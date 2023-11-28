@@ -1,0 +1,12 @@
+[submodule "third_party/packages"]
+	path = third_party/packages
+	url = https://github.com/flutter/packages
+[submodule "third_party/rapidjson"]
+	path = third_party/rapidjson
+	url = https://fuchsia.googlesource.com/third_party/rapidjson
+[submodule "third_party/dart"]
+	path = third_party/dart
+	url = https://dart.googlesource.com/sdk.git
+[submodule "third_party/flutter"]
+	path = third_party/flutter
+	url = https://github.com/flutter/engine.git
