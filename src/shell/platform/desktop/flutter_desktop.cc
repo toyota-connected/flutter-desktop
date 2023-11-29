@@ -63,11 +63,11 @@ struct FlutterDesktopWindowControllerState {
   std::vector<std::unique_ptr<flutter::KeyboardHookHandler>>
   keyboard_hook_handlers;
 
-  // Whether or not the pointer has been added (or if tracking is enabled,
+  // Whether the pointer has been added (or if tracking is enabled,
   // has been added since it was last removed).
   bool pointer_currently_added = false;
 
-  // Whether or not the pointer is down.
+  // Whether the pointer is down.
   bool pointer_currently_down = false;
 
   // The currently pressed buttons, as represented in FlutterPointerEvent.
@@ -80,12 +80,12 @@ struct FlutterDesktopWindowControllerState {
 
 // Opaque reference for the GLFW window itself. This is separate from the
 // controller so that it can be provided to plugins without giving them access
-// to all of the controller-based functionality.
+// to all the controller-based functionality.
 struct FlutterDesktopWindow {
   // The GLFW window that (indirectly) owns this state object.
-  GLFWwindow* window;
+  GLFWwindow* window{};
 
-  // Whether or not to track mouse movements to send kHover events.
+  // Whether to track mouse movements to send kHover events.
   bool hover_tracking_enabled = true;
 
   // The ratio of pixels per screen coordinate for the window.
@@ -102,7 +102,7 @@ struct FlutterDesktopWindow {
 
 // Custom deleter for FlutterEngineAOTData.
 struct AOTDataDeleter {
-  void operator()(const FlutterEngineAOTData aot_data) const {
+  void operator()(FlutterEngineAOTData aot_data) const {
     LibFlutterEngine->CollectAOTData(aot_data);
   }
 };
@@ -116,7 +116,7 @@ std::unique_ptr<FlutterDesktopMessenger,
 // Struct for storing state of a Flutter engine instance.
 struct FlutterDesktopEngineState {
   // The handle to the Flutter engine instance.
-  FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine{};
 
   // The event loop for the main thread that allows for delayed task execution.
   std::unique_ptr<flutter::EventLoop> event_loop;
@@ -197,7 +197,7 @@ struct FlutterDesktopMessenger {
 
 private:
   // The engine that backs this messenger.
-  FlutterDesktopEngineState* engine_;
+  FlutterDesktopEngineState* engine_{};
   std::atomic<int32_t> ref_count_ = 0;
   std::mutex mutex_;
 };
@@ -289,8 +289,8 @@ static void SendWindowMetrics(
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
-  event.width = width;
-  event.height = height;
+  event.width = (size_t)width;
+  event.height = (size_t)height;
   if (controller->window_wrapper->pixel_ratio_override == 0.0) {
     // The Flutter pixel_ratio is defined as DPI/dp. Limit the ratio to a
     // minimum of 1 to avoid rendering a smaller UI on standard resolution
@@ -381,10 +381,10 @@ static void SendPointerEventWithData(GLFWwindow* window,
   FlutterPointerEvent event = event_data;
   // Set metadata that's always the same regardless of the event.
   event.struct_size = sizeof(event);
-  event.timestamp =
+  event.timestamp = static_cast<size_t>(
       std::chrono::duration_cast<std::chrono::microseconds>(
           std::chrono::high_resolution_clock::now().time_since_epoch())
-      .count();
+          .count());
   event.device_kind = FlutterPointerDeviceKind::kFlutterPointerDeviceKindMouse;
   event.buttons =
       (event.phase == FlutterPointerPhase::kAdd) ? 0 : controller->buttons;
@@ -940,12 +940,14 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
 
 void FlutterDesktopDestroyWindow(FlutterDesktopWindowControllerRef controller) {
   controller->engine->messenger->SetEngine(nullptr);
+  LibFlutterEngine->Shutdown(controller->engine->flutter_engine);
   const FlutterDesktopPluginRegistrarRef registrar =
       controller->engine->plugin_registrar.get();
   if (registrar->destruction_handler) {
     registrar->destruction_handler(registrar);
   }
-  LibFlutterEngine->Shutdown(controller->engine->flutter_engine);
+  GLFWClearEventCallbacks(controller->window_wrapper->window);
+//  LibFlutterEngine->Shutdown(controller->engine->flutter_engine);
   delete controller;
 }
 

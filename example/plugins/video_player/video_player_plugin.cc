@@ -38,18 +38,17 @@ std::optional<FlutterError> VideoPlayerPlugin::Play(
   return std::nullopt;
 }
 
-ErrorOr<PositionMessage>
-VideoPlayerPlugin::Position(const TextureMessage& /* msg */) {
+ErrorOr<PositionMessage> VideoPlayerPlugin::Position(
+    const TextureMessage& /* msg */) {
   return PositionMessage(0, 0.0);
 }
 
 void VideoPlayerPlugin::SeekTo(
     const PositionMessage& /* msg */,
-    std::function<void(std::optional<FlutterError> reply)> /* result */) {
-}
+    std::function<void(std::optional<FlutterError> reply)> /* result */) {}
 
-std::optional<FlutterError>
-VideoPlayerPlugin::Pause(const TextureMessage& /* msg */) {
+std::optional<FlutterError> VideoPlayerPlugin::Pause(
+    const TextureMessage& /* msg */) {
   return std::nullopt;
 }
 
@@ -57,4 +56,4 @@ std::optional<FlutterError> VideoPlayerPlugin::SetMixWithOthers(
     const MixWithOthersMessage& /* msg */) {
   return std::nullopt;
 }
-}
+}  // namespace video_player

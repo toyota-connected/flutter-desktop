@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "shell/platform/wayland/system_utils.h"
+#include "shell/platform/desktop/system_utils.h"
 
 #include <cstdlib>
 

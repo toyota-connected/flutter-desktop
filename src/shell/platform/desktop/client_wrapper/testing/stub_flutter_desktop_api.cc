@@ -2,32 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/glfw/client_wrapper/testing/stub_flutter_glfw_api.h"
+#include "flutter/shell/platform/desktop/client_wrapper/testing/stub_flutter_desktop_api.h"
 
-static flutter::testing::StubFlutterWaylandApi* s_stub_implementation;
+static flutter::testing::StubFlutterDesktopApi* s_stub_implementation;
 
 namespace flutter {
 namespace testing {
 
 // static
-void StubFlutterWaylandApi::SetTestStub(StubFlutterWaylandApi* stub) {
+void StubFlutterDesktopApi::SetTestStub(StubFlutterDesktopApi* stub) {
   s_stub_implementation = stub;
 }
 
 // static
-StubFlutterWaylandApi* StubFlutterWaylandApi::GetTestStub() {
+StubFlutterDesktopApi* StubFlutterDesktopApi::GetTestStub() {
   return s_stub_implementation;
 }
 
-ScopedStubFlutterWaylandApi::ScopedStubFlutterWaylandApi(
-    std::unique_ptr<StubFlutterWaylandApi> stub)
+ScopedStubFlutterDesktopApi::ScopedStubFlutterDesktopApi(
+    std::unique_ptr<StubFlutterDesktopApi> stub)
     : stub_(std::move(stub)) {
-  previous_stub_ = StubFlutterWaylandApi::GetTestStub();
-  StubFlutterWaylandApi::SetTestStub(stub_.get());
+  previous_stub_ = StubFlutterDesktopApi::GetTestStub();
+  StubFlutterDesktopApi::SetTestStub(stub_.get());
 }
 
-ScopedStubFlutterWaylandApi::~ScopedStubFlutterWaylandApi() {
-  StubFlutterWaylandApi::SetTestStub(previous_stub_);
+ScopedStubFlutterDesktopApi::~ScopedStubFlutterDesktopApi() {
+  StubFlutterDesktopApi::SetTestStub(previous_stub_);
 }
 
 }  // namespace testing

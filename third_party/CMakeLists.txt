@@ -49,3 +49,24 @@ target_compile_definitions(platform_common PUBLIC
 )
 
 add_sanitizers(platform_common)
+
+
+install(DIRECTORY flutter/shell/platform/common/public/
+        DESTINATION
+        ${CMAKE_INSTALL_DATAROOTDIR}/flutter_desktop/include
+        FILES_MATCHING
+        PATTERN "*.h"
+)
+
+install(DIRECTORY flutter/shell/platform/common/client_wrapper/include/
+        DESTINATION
+        ${CMAKE_INSTALL_DATAROOTDIR}/flutter_desktop/include
+        FILES_MATCHING
+        PATTERN "*.h"
+)
+
+install(DIRECTORY flutter/shell/platform/common/client_wrapper/include/flutter/
+        DESTINATION share/flutter_desktop/include/flutter
+        FILES_MATCHING
+        PATTERN "*.h"
+)

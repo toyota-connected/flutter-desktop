@@ -21,3 +21,7 @@ add_library(plugin_pigeon_api STATIC
 target_link_libraries(plugin_pigeon_api PUBLIC platform_desktop)
 
 add_sanitizers(plugin_pigeon_api)
+
+if (IPO_SUPPORT_RESULT)
+    set_property(TARGET plugin_pigeon_api PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()

@@ -46,24 +46,33 @@ target_include_directories(platform_desktop PUBLIC
         client_wrapper/include
         client_wrapper/include/flutter
 )
+
 target_link_libraries(platform_desktop platform_common glfw OpenGL::EGL)
+
+set_target_properties(platform_desktop PROPERTIES OUTPUT_NAME "flutter_desktop")
 
 add_sanitizers(platform_desktop)
 
-include(GNUInstallDirs)
+if (IPO_SUPPORT_RESULT)
+    set_property(TARGET platform_desktop PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()
+
 install(TARGETS platform_desktop
         EXPORT platform_desktop
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        INCLUDES DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/include
+        RUNTIME DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/bin
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lib
+        LIBRARY DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/lib
+)
 
-install(FILES
-        public/platform_desktop.h
-        client_wrapper/include/flutter/flutter_engine.h
-        client_wrapper/include/flutter/flutter_window.h
-        client_wrapper/include/flutter/flutter_window_controller.h
-        client_wrapper/include/flutter/plugin_registrar_desktop.h
+install(FILES public/flutter_desktop.h
         DESTINATION
-        share/platform_desktop/
+        ${CMAKE_INSTALL_DATAROOTDIR}/flutter_desktop/include
+)
+
+install(DIRECTORY client_wrapper/include
+        DESTINATION
+        ${CMAKE_INSTALL_DATAROOTDIR}/flutter_desktop
+        FILES_MATCHING
+        PATTERN "*.h"
 )

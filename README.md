@@ -1,6 +1,6 @@
 # Linux Pigeon Sandbox
 
-This is a sandbox to experiement with Pigeon based plugins on Linux.
+This is a sandbox to experiment with Pigeon-based plugins on Linux.
 
 Checkout this repo and run
 
@@ -18,6 +18,26 @@ Create bundle folder following folder layout
 Run from build folder
 
     example/example <bundle folder>
+
+### Observatory
+
+You may need to jump through some hoops to access the Observatory.
+
+After starting the example, find the URL pattern
+
+    flutter: The Dart VM service is listening on http://127.0.0.1:36893/wSOQS4qdu3M=/
+
+If when Clicking the link you get
+
+    This VM does not have a registered Dart Development Service (DDS) instance and is not currently serving Dart DevTools.
+
+Then enter
+
+    http://127.0.0.1:36893/wSOQS4qdu3M=/_serveObservatory
+
+After the jsonrpc reports success, re-run this to access the observatory
+
+    http://127.0.0.1:36893/wSOQS4qdu3M=/
 
 ### Bundle Folder Layout
 

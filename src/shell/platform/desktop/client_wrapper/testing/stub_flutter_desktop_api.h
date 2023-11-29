@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WAYLAND_WRAPPER_TESTING_STUB_FLUTTER_GLFW_API_H_
-#define FLUTTER_SHELL_PLATFORM_WAYLAND_WRAPPER_TESTING_STUB_FLUTTER_GLFW_API_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_WRAPPER_TESTING_STUB_FLUTTER_DESKTOP_API_H_
+#define FLUTTER_SHELL_PLATFORM_DESKTOP_WRAPPER_TESTING_STUB_FLUTTER_DESKTOP_API_H_
 
 #include <memory>
 
@@ -13,21 +13,21 @@ namespace flutter {
 namespace testing {
 
 // Base class for a object that provides test implementations of the APIs in
-// the headers in platform/glfw/public/.
+// the headers in platform/desktop/public/.
 
 // Linking this class into a test binary will provide dummy forwarding
 // implementations of that C API, so that the wrapper can be tested separately
 // from the actual library.
-class StubFlutterWaylandApi {
+class StubFlutterDesktopApi {
  public:
   // Sets |stub| as the instance to which calls to the Flutter library C APIs
   // will be forwarded.
-  static void SetTestStub(StubFlutterWaylandApi* stub);
+  static void SetTestStub(StubFlutterDesktopApi* stub);
 
   // Returns the current stub, as last set by SetTestFlutterStub.
-  static StubFlutterWaylandApi* GetTestStub();
+  static StubFlutterDesktopApi* GetTestStub();
 
-  virtual ~StubFlutterWaylandApi() {}
+  virtual ~StubFlutterDesktopApi() {}
 
   // Called for FlutterDesktopInit.
   virtual bool Init() { return true; }
@@ -95,23 +95,23 @@ class StubFlutterWaylandApi {
 
 // A test helper that owns a stub implementation, making it the test stub for
 // the lifetime of the object, then restoring the previous value.
-class ScopedStubFlutterWaylandApi {
+class ScopedStubFlutterDesktopApi {
  public:
   // Calls SetTestFlutterStub with |stub|.
-  explicit ScopedStubFlutterWaylandApi(std::unique_ptr<StubFlutterWaylandApi> stub);
+  explicit ScopedStubFlutterDesktopApi(std::unique_ptr<StubFlutterDesktopApi> stub);
 
   // Restores the previous test stub.
-  ~ScopedStubFlutterWaylandApi();
+  ~ScopedStubFlutterDesktopApi();
 
-  StubFlutterWaylandApi* stub() { return stub_.get(); }
+  StubFlutterDesktopApi* stub() { return stub_.get(); }
 
  private:
-  std::unique_ptr<StubFlutterWaylandApi> stub_;
+  std::unique_ptr<StubFlutterDesktopApi> stub_;
   // The previous stub.
-  StubFlutterWaylandApi* previous_stub_;
+  StubFlutterDesktopApi* previous_stub_;
 };
 
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WAYLAND_WRAPPER_TESTING_STUB_FLUTTER_GLFW_API_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_WRAPPER_TESTING_STUB_FLUTTER_DESKTOP_API_H_

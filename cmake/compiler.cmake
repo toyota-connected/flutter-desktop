@@ -106,3 +106,19 @@ message("-- CC ..................... ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_ARG1
 message("-- CXX .................... ${CMAKE_C_COMPILER} ${CMAKE_CXX_COMPILER_ARG1}")
 message("-- CFLAGS ................. ${CMAKE_C_FLAGS}")
 message("-- CXXFLAGS ............... ${CMAKE_CXX_FLAGS}")
+
+#
+# Toolchain IPO/LTO support
+#
+cmake_policy(SET CMP0069 NEW)
+include(CheckIPOSupported)
+check_ipo_supported(
+        RESULT IPO_SUPPORT_RESULT
+        OUTPUT IPO_SUPPORT_OUTPUT
+        LANGUAGES C CXX
+)
+if (IPO_SUPPORT_RESULT)
+    message(STATUS "IPO .................... supported")
+else ()
+    message(STATUS "IPO .................... not supported: ${IPO_SUPPORT_OUTPUT}")
+endif ()

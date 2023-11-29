@@ -33,3 +33,7 @@ target_link_libraries(example PRIVATE
 )
 
 add_sanitizers(example)
+
+if (IPO_SUPPORT_RESULT)
+    set_property(TARGET example PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif ()

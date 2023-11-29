@@ -30,7 +30,7 @@ endif ()
 
 project(flutter_desktop
         VERSION "1.0.${BUILD_NUMBER}"
-        DESCRIPTION "Flutter Desktop (GLFW) Embedder"
+        DESCRIPTION "Flutter Desktop Embedder"
         LANGUAGES CXX C
 )
 
@@ -40,6 +40,8 @@ message(STATUS "Version ................ ${PROJECT_VERSION}")
 message(STATUS "Generator .............. ${CMAKE_GENERATOR}")
 message(STATUS "Build Type ............. ${CMAKE_BUILD_TYPE}")
 
+include(GNUInstallDirs)
+
 #
 # Sanitizers
 #
@@ -47,9 +49,10 @@ find_package(Sanitizers)
 
 include(compiler)
 
-set(CMAKE_CXX_STANDARD 17)
-
 add_subdirectory(third_party)
 add_subdirectory(src/shell/platform/desktop)
-
 add_subdirectory(example)
+
+if (NOT CMAKE_CROSSCOMPILING)
+    include(packaging)
+endif ()
