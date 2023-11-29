@@ -1,0 +1,27 @@
+From fcc9a05c145c378af9390a757807c084f725fcf4 Mon Sep 17 00:00:00 2001
+From: Joel Winarske <joel.winarske@gmail.com>
+Date: Tue, 28 Nov 2023 15:59:56 -0800
+Subject: [PATCH] Support Linux
+
+Signed-off-by: Joel Winarske <joel.winarske@gmail.com>
+---
+ .../common/client_wrapper/include/flutter/binary_messenger.h   | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h b/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h
+index d552b499ee..e624c9b27d 100644
+--- a/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h
++++ b/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h
+@@ -7,6 +7,9 @@
+ 
+ #include <functional>
+ #include <string>
++#if defined(__linux__)
++#include <cstdint>
++#endif
+ 
+ namespace flutter {
+ 
+-- 
+2.43.0
+

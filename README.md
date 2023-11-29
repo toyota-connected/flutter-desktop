@@ -5,6 +5,8 @@ This is a sandbox to experiement with Pigeon based plugins on Linux.
 Checkout this repo and run
 
     git submodule update --init --recursive
+    cd third_party/flutter
+    git apply ../../patches/0001-Support-Linux.patch
 
 Build
     mkdir build && cd build
