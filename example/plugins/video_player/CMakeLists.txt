@@ -20,3 +20,5 @@ add_library(plugin_video_player STATIC
         video_player_plugin_c_api.cc
 )
 target_link_libraries(plugin_video_player PUBLIC platform_desktop)
+
+add_sanitizers(plugin_video_player)

@@ -31,3 +31,5 @@ target_link_libraries(example PRIVATE
         platform_common
         platform_desktop
 )
+
+add_sanitizers(example)

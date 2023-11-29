@@ -19,26 +19,22 @@ namespace pigeon_example {
 // Generated class from Pigeon.
 
 class FlutterError {
-public:
-  explicit FlutterError(const std::string& code)
-    : code_(code) {
-  }
+ public:
+  explicit FlutterError(const std::string& code) : code_(code) {}
 
   explicit FlutterError(const std::string& code, const std::string& message)
-    : code_(code), message_(message) {
-  }
+      : code_(code), message_(message) {}
 
   explicit FlutterError(const std::string& code,
                         const std::string& message,
                         const flutter::EncodableValue& details)
-    : code_(code), message_(message), details_(details) {
-  }
+      : code_(code), message_(message), details_(details) {}
 
   const std::string& code() const { return code_; }
   const std::string& message() const { return message_; }
   const flutter::EncodableValue& details() const { return details_; }
 
-private:
+ private:
   std::string code_;
   std::string message_;
   flutter::EncodableValue details_;
@@ -46,28 +42,20 @@ private:
 
 template <class T>
 class ErrorOr {
-public:
-  ErrorOr(const T& rhs)
-    : v_(rhs) {
-  }
+ public:
+  ErrorOr(const T& rhs) : v_(rhs) {}
 
-  ErrorOr(const T&& rhs)
-    : v_(std::move(rhs)) {
-  }
+  ErrorOr(const T&& rhs) : v_(std::move(rhs)) {}
 
-  ErrorOr(const FlutterError& rhs)
-    : v_(rhs) {
-  }
+  ErrorOr(const FlutterError& rhs) : v_(rhs) {}
 
-  ErrorOr(const FlutterError&& rhs)
-    : v_(std::move(rhs)) {
-  }
+  ErrorOr(const FlutterError&& rhs) : v_(std::move(rhs)) {}
 
   bool has_error() const { return std::holds_alternative<FlutterError>(v_); }
   const T& value() const { return std::get<T>(v_); };
   const FlutterError& error() const { return std::get<FlutterError>(v_); };
 
-private:
+ private:
   friend class ExampleHostApi;
   friend class MessageFlutterApi;
   ErrorOr() = default;
@@ -80,7 +68,7 @@ enum class Code { one = 0, two = 1 };
 
 // Generated class from Pigeon that represents data sent in messages.
 class MessageData {
-public:
+ public:
   // Constructs an object setting all non-nullable fields.
   explicit MessageData(const Code& code, const flutter::EncodableMap& data);
 
@@ -104,7 +92,7 @@ public:
   const flutter::EncodableMap& data() const;
   void set_data(const flutter::EncodableMap& value_arg);
 
-private:
+ private:
   static MessageData FromEncodableList(const flutter::EncodableList& list);
   flutter::EncodableList ToEncodableList() const;
   friend class ExampleHostApi;
@@ -117,9 +105,9 @@ private:
   flutter::EncodableMap data_;
 };
 
-class ExampleHostApiCodecSerializer final : public
-    flutter::StandardCodecSerializer {
-public:
+class ExampleHostApiCodecSerializer final
+    : public flutter::StandardCodecSerializer {
+ public:
   ExampleHostApiCodecSerializer();
 
   inline static ExampleHostApiCodecSerializer& GetInstance() {
@@ -130,7 +118,7 @@ public:
   void WriteValue(const flutter::EncodableValue& value,
                   flutter::ByteStreamWriter* stream) const override;
 
-protected:
+ protected:
   flutter::EncodableValue ReadValueOfType(
       uint8_t type,
       flutter::ByteStreamReader* stream) const override;
@@ -139,12 +127,11 @@ protected:
 // Generated interface from Pigeon that represents a handler of messages from
 // Flutter.
 class ExampleHostApi {
-public:
+ public:
   ExampleHostApi(const ExampleHostApi&) = delete;
   ExampleHostApi& operator=(const ExampleHostApi&) = delete;
 
-  virtual ~ExampleHostApi() {
-  }
+  virtual ~ExampleHostApi() {}
 
   virtual ErrorOr<std::string> GetHostLanguage() = 0;
   virtual ErrorOr<int64_t> Add(int64_t a, int64_t b) = 0;
@@ -160,22 +147,22 @@ public:
   static flutter::EncodableValue WrapError(std::string_view error_message);
   static flutter::EncodableValue WrapError(const FlutterError& error);
 
-protected:
+ protected:
   ExampleHostApi() = default;
 };
 
 // Generated class from Pigeon that represents Flutter messages that can be
 // called from C++.
 class MessageFlutterApi {
-public:
+ public:
   MessageFlutterApi(flutter::BinaryMessenger* binary_messenger);
   static const flutter::StandardMessageCodec& GetCodec();
   void FlutterMethod(const std::string* a_string,
                      std::function<void(const std::string&)>&& on_success,
                      std::function<void(const FlutterError&)>&& on_error);
 
-private:
+ private:
   flutter::BinaryMessenger* binary_messenger_;
 };
-} // namespace pigeon_example
+}  // namespace pigeon_example
 #endif  // PIGEON_MESSAGES_G_H_

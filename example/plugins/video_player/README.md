@@ -1,6 +1,6 @@
 # video_player
 
-### re-generate messages.g.cc + messages.g.h 
+### re-generate messages.g.cc + messages.g.h
 
     cd third_party/packages/packages/video_player/video_player_avfoundation
     flutter pub run pigeon --input pigeons/messages.dart --cpp_header_out messages.g.h --cpp_source_out messages.g.cc --cpp_namespace video_player
@@ -16,7 +16,6 @@ Create bundle folder with workspace_automation support
     q
     cd .desktop-homescreen/
     export BUNDLE=`pwd`
-
 
 ### Automatically create a bundle folder using workspace_automation
 

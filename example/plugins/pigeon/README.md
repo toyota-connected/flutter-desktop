@@ -1,6 +1,6 @@
 # pigeon_api
 
-### re-generate messages.g.cc + messages.g.h 
+### re-generate messages.g.cc + messages.g.h
 
     git clone https://github.com/flutter/packages
     cd packages/packages/pigeon/example/app

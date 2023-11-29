@@ -1,5 +1,5 @@
 /*
-* Copyright 2023 Toyota Connected North America
+ * Copyright 2023 Toyota Connected North America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 
 namespace pigeon_example {
 class PigeonApiPlugin final : public flutter::Plugin, public ExampleHostApi {
-public:
+ public:
   PigeonApiPlugin() = default;
   ~PigeonApiPlugin() override = default;
 
@@ -33,7 +33,8 @@ public:
 
   ErrorOr<int64_t> Add(const int64_t a, const int64_t b) override {
     if (a < 0 || b < 0) {
-      return FlutterError("code", "message", "details");
+      return FlutterError("code", "message",
+                          flutter::EncodableValue("details"));
     }
     return a + b;
   }
@@ -41,14 +42,14 @@ public:
   void SendMessage(const MessageData& message,
                    std::function<void(ErrorOr<bool> reply)> result) override {
     if (Code::one == message.code()) {
-      result(FlutterError("code", "message", "details"));
+      result(
+          FlutterError("code", "message", flutter::EncodableValue("details")));
       return;
     }
     result(true);
   }
 
-  static void RegisterWithRegistrar(
-      flutter::PluginRegistrar* registrar) {
+  static void RegisterWithRegistrar(flutter::PluginRegistrar* registrar) {
     auto plugin = std::make_unique<PigeonApiPlugin>();
 
     SetUp(registrar->messenger(), plugin.get());
@@ -56,6 +57,6 @@ public:
     registrar->AddPlugin(std::move(plugin));
   }
 };
-}
+}  // namespace pigeon_example
 
-#endif // PIGEON_API_PLUGIN_H_
+#endif  // PIGEON_API_PLUGIN_H_

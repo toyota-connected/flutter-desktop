@@ -19,3 +19,5 @@ add_library(plugin_pigeon_api STATIC
         pigeon_api_plugin_c_api.cc
 )
 target_link_libraries(plugin_pigeon_api PUBLIC platform_desktop)
+
+add_sanitizers(plugin_pigeon_api)
