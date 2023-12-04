@@ -19,7 +19,7 @@
 
 #include <functional>
 
-#include <flutter/plugin_registrar.h>
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 
 #include "messages.g.h"
 

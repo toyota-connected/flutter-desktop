@@ -51,6 +51,7 @@ include(compiler)
 
 add_subdirectory(third_party)
 add_subdirectory(src/shell/platform/desktop)
+add_subdirectory(plugins)
 add_subdirectory(example)
 
 if (NOT CMAKE_CROSSCOMPILING)

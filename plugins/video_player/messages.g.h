@@ -6,10 +6,10 @@
 
 #ifndef PIGEON_MESSAGES_G_H_
 #define PIGEON_MESSAGES_G_H_
-#include <flutter/basic_message_channel.h>
-#include <flutter/binary_messenger.h>
-#include <flutter/encodable_value.h>
-#include <flutter/standard_message_codec.h>
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 
 #include <map>
 #include <optional>

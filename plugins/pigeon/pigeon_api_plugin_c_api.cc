@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "include/video_player/video_player_plugin_c_api.h"
+#include "plugins/pigeon/include/pigeon_api/pigeon_api_plugin_c_api.h"
 
-#include <flutter/plugin_registrar_desktop.h>
+#include "shell/platform/desktop/client_wrapper/include/flutter/plugin_registrar_desktop.h"
 
-#include "video_player_plugin.h"
+#include "pigeon_api_plugin.h"
 
-void VideoPlayerPluginCApiRegisterWithRegistrar(
+void PigeonApiPluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
-  video_player::VideoPlayerPlugin::RegisterWithRegistrar(
+  pigeon_example::PigeonApiPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarDesktop>(registrar));
 }

@@ -15,18 +15,13 @@
 #
 
 #
-# Plugins
-#
-add_subdirectory(plugins/pigeon)
-add_subdirectory(plugins/video_player)
-
-#
 # Example
 #
 add_executable(example main.cc)
 
 target_link_libraries(example PRIVATE
         plugin_pigeon_api
+        plugin_firebase_core
         plugin_video_player
         platform_common
         platform_desktop

@@ -15,14 +15,13 @@
  */
 
 #include <flutter/plugin_registrar.h>
-#include <cassert>
 #include <iostream>
 #include <memory>
-#include <thread>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "src/shell/platform/desktop/public/flutter_desktop.h"
 
+#include "plugins/firebase_core/include/firebase_core/firebase_core_plugin_c_api.h"
 #include "plugins/pigeon/include/pigeon_api/pigeon_api_plugin_c_api.h"
 #include "plugins/video_player/include/video_player/video_player_plugin_c_api.h"
 
@@ -40,6 +39,9 @@ void printUsage() {
 }
 
 void RegisterPlugins(FlutterDesktopEngineRef engine) {
+  // Firebase Core
+  FirebaseCorePluginCApiRegisterWithRegistrar(
+      FlutterDesktopGetPluginRegistrar(engine, ""));
   // Pigeon Demo
   PigeonApiPluginCApiRegisterWithRegistrar(
       FlutterDesktopGetPluginRegistrar(engine, ""));
