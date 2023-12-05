@@ -20,17 +20,18 @@
 if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
     message(STATUS "Firebase CPP SDK Root: ${FIREBASE_CPP_SDK_ROOT_DIR}")
 
-    add_library(plugin_firebase_core STATIC
-            firebase_core_plugin.cc
-            firebase_core_plugin_c_api.cc
-            messages.g.cc
+    add_library(plugin_cloud_firestore STATIC
+        cloud_firestore_plugin_c_api.cc
+        cloud_firestore_plugin.cc
+        firestore_codec.cc
+        messages.g.cc
     )
-    target_include_directories(plugin_firebase_core PRIVATE
+    target_include_directories(plugin_cloud_firestore PRIVATE
             ${FIREBASE_CPP_SDK_ROOT_DIR}/app/src/include
             ${FIREBASE_CPP_SDK_ROOT_DIR}/auth/src/include
             ${FIREBASE_CPP_SDK_ROOT_DIR}/database/src/include
     )
-    target_link_directories(plugin_firebase_core PUBLIC
+    target_link_directories(plugin_cloud_firestore PUBLIC
             ${FIREBASE_CPP_SDK_BINARY_DIR}/installations
             ${FIREBASE_CPP_SDK_BINARY_DIR}/messaging
             ${FIREBASE_CPP_SDK_BINARY_DIR}/analytics
@@ -48,16 +49,20 @@ if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
             ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/flatbuffers-build
             platform_desktop
     )
-    target_link_libraries(plugin_firebase_core PUBLIC
+    target_link_libraries(plugin_cloud_firestore PUBLIC
             platform_desktop
+            firestore_core
+            firestore_nanopb
+            firestore_util
+            firestore_protos_nanopb
             firebase_app
             flatbuffers
             z
     )
 
-    add_sanitizers(plugin_firebase_core)
+    add_sanitizers(plugin_cloud_firestore)
 
     if (IPO_SUPPORT_RESULT)
-        set_property(TARGET plugin_firebase_core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+        set_property(TARGET plugin_cloud_firestore PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif ()
 endif ()

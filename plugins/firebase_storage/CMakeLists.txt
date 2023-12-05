@@ -20,17 +20,16 @@
 if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
     message(STATUS "Firebase CPP SDK Root: ${FIREBASE_CPP_SDK_ROOT_DIR}")
 
-    add_library(plugin_firebase_core STATIC
-            firebase_core_plugin.cc
-            firebase_core_plugin_c_api.cc
-            messages.g.cc
+    add_library(plugin_firebase_storage STATIC
+            firebase_storage_plugin.cc
+            firebase_storage_plugin_c_api.cc
+            pigeon_messages.g.cc
     )
-    target_include_directories(plugin_firebase_core PRIVATE
+    target_include_directories(plugin_firebase_storage PRIVATE
             ${FIREBASE_CPP_SDK_ROOT_DIR}/app/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/auth/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/database/src/include
+            ${FIREBASE_CPP_SDK_ROOT_DIR}/storage/src/include
     )
-    target_link_directories(plugin_firebase_core PUBLIC
+    target_link_directories(plugin_firebase_storage PUBLIC
             ${FIREBASE_CPP_SDK_BINARY_DIR}/installations
             ${FIREBASE_CPP_SDK_BINARY_DIR}/messaging
             ${FIREBASE_CPP_SDK_BINARY_DIR}/analytics
@@ -48,16 +47,17 @@ if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
             ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/flatbuffers-build
             platform_desktop
     )
-    target_link_libraries(plugin_firebase_core PUBLIC
+    target_link_libraries(plugin_firebase_storage PUBLIC
             platform_desktop
+            firebase_storage
             firebase_app
             flatbuffers
             z
     )
 
-    add_sanitizers(plugin_firebase_core)
+    add_sanitizers(plugin_firebase_storage)
 
     if (IPO_SUPPORT_RESULT)
-        set_property(TARGET plugin_firebase_core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+        set_property(TARGET plugin_firebase_storage PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif ()
 endif ()

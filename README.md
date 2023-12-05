@@ -1,6 +1,7 @@
-# Linux Pigeon Sandbox
+# Flutter Desktop
 
-This is a sandbox to experiment with Pigeon-based plugins on Linux.
+This is a fork of the Flutter Engine platform/glfw platform. This has a plugin registrar and is suitable for running
+cross-platform development scenarios.
 
 Checkout this repo and run
 
@@ -9,9 +10,9 @@ Checkout this repo and run
     git apply ../../patches/0001-Support-Linux.patch
 
 Build
-    mkdir build && cd build
-    cmake .. -GNinja
-    ninja -j`nproc`
+mkdir build && cd build
+cmake .. -GNinja
+ninja -j`nproc`
 
 Create bundle folder following folder layout
 
