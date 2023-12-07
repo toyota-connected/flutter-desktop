@@ -132,7 +132,7 @@ class FirebaseStoragePlugin : public flutter::Plugin,
 
  private:
   bool storageInitialized = false;
-  std::map<uint64_t, std::unique_ptr<::firebase::storage::Controller>>
+  std::map<int64_t, std::unique_ptr<::firebase::storage::Controller>>
       controllers_;
 };
 

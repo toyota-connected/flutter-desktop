@@ -434,7 +434,7 @@ void AVFoundationVideoPlayerApi::SetUp(
   {
     auto channel = std::make_unique<BasicMessageChannel<>>(binary_messenger, "dev.flutter.pigeon.video_player_avfoundation.AVFoundationVideoPlayerApi.initialize", &GetCodec());
     if (api != nullptr) {
-      channel->SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
+      channel->SetMessageHandler([api](const EncodableValue& /* message */, const flutter::MessageReply<EncodableValue>& reply) {
         try {
           std::optional<FlutterError> output = api->Initialize();
           if (output.has_value()) {

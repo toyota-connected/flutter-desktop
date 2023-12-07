@@ -19,13 +19,35 @@
 #
 add_executable(example main.cc)
 
+target_include_directories(example PRIVATE)
+
 target_link_libraries(example PRIVATE
-        plugin_pigeon_api
-        plugin_firebase_core
-        plugin_video_player
         platform_common
         platform_desktop
+        plugin_pigeon_api
+        plugin_video_player
 )
+
+if (BUILD_PLUGIN_FIREBASE_CORE)
+    target_link_libraries(example PRIVATE plugin_firebase_core)
+    target_compile_definitions(example PRIVATE ENABLE_PLUGIN_FIREBASE_CORE)
+endif ()
+
+if (BUILD_PLUGIN_CLOUD_FIRESTORE)
+    target_link_libraries(example PRIVATE plugin_cloud_firestore)
+    target_compile_definitions(example PRIVATE ENABLE_PLUGIN_CLOUD_FIRESTORE)
+endif ()
+
+if (BUILD_PLUGIN_FIREBASE_AUTH)
+    target_link_libraries(example PRIVATE plugin_firebase_auth)
+    target_compile_definitions(example PRIVATE ENABLE_PLUGIN_FIREBASE_AUTH)
+endif ()
+
+if (BUILD_PLUGIN_FIREBASE_STORAGE)
+    target_link_libraries(example PRIVATE plugin_firebase_storage)
+    target_compile_definitions(example PRIVATE ENABLE_PLUGIN_FIREBASE_STORAGE)
+endif ()
+
 
 add_sanitizers(example)
 

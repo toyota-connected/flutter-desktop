@@ -11,7 +11,7 @@
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar.h>
 
-#include "firebase_core.h"
+#include "messages.g.h"
 
 namespace firebase_core_linux {
 

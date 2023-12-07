@@ -26,7 +26,7 @@ class FirebaseAuthPlugin : public flutter::Plugin,
                            public FirebaseAuthHostApi,
                            public FirebaseAuthUserHostApi {
  public:
-  static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
+  static void RegisterWithRegistrar(flutter::PluginRegistrarDesktop* registrar);
 
   FirebaseAuthPlugin();
 

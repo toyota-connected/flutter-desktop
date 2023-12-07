@@ -10,9 +10,9 @@
 #include <flutter_plugin_registrar.h>
 
 #ifdef FLUTTER_PLUGIN_IMPL
-#define FLUTTER_PLUGIN_EXPORT __declspec(dllexport)
+#define FLUTTER_PLUGIN_EXPORT __attribute__((visibility("default")))
 #else
-#define FLUTTER_PLUGIN_EXPORT __declspec(dllimport)
+#define FLUTTER_PLUGIN_EXPORT __attribute__((visibility("default")))
 #endif
 
 #if defined(__cplusplus)

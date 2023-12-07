@@ -14,50 +14,23 @@
 # limitations under the License.
 #
 
-#
-# Firebase C++ SDK
-#
-if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
-    message(STATUS "Firebase CPP SDK Root: ${FIREBASE_CPP_SDK_ROOT_DIR}")
+add_library(plugin_firebase_core STATIC
+        firebase_core_plugin.cc
+        firebase_core_plugin_c_api.cc
+        messages.g.cc
+)
 
-    add_library(plugin_firebase_core STATIC
-            firebase_core_plugin.cc
-            firebase_core_plugin_c_api.cc
-            messages.g.cc
-    )
-    target_include_directories(plugin_firebase_core PRIVATE
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/app/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/auth/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/database/src/include
-    )
-    target_link_directories(plugin_firebase_core PUBLIC
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/installations
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/messaging
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/analytics
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app_check
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/database
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/dynamic_links
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/remote_config
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/auth
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app/rest
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/storage
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/functions
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/gma
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/zlib-build
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/flatbuffers-build
-            platform_desktop
-    )
-    target_link_libraries(plugin_firebase_core PUBLIC
-            platform_desktop
-            firebase_app
-            flatbuffers
-            z
-    )
+target_include_directories(plugin_firebase_core PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${FIREBASE_CPP_SDK_DIR}/app/src/include
+)
 
-    add_sanitizers(plugin_firebase_core)
+target_link_libraries(plugin_firebase_core PUBLIC
+        platform_desktop
+)
 
-    if (IPO_SUPPORT_RESULT)
-        set_property(TARGET plugin_firebase_core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif ()
+add_sanitizers(plugin_firebase_core)
+
+if (IPO_SUPPORT_RESULT)
+    set_property(TARGET plugin_firebase_core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()

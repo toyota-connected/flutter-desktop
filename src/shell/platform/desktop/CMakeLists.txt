@@ -53,10 +53,6 @@ set_target_properties(platform_desktop PROPERTIES OUTPUT_NAME "flutter_desktop")
 
 add_sanitizers(platform_desktop)
 
-if (IPO_SUPPORT_RESULT)
-    set_property(TARGET platform_desktop PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-endif ()
-
 install(TARGETS platform_desktop
         EXPORT platform_desktop
         INCLUDES DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/include

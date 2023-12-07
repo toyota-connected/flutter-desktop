@@ -4,13 +4,13 @@
 
 #include "include/firebase_storage/firebase_storage_plugin_c_api.h"
 
-#include <flutter/plugin_registrar_windows.h>
+#include <flutter/plugin_registrar_desktop.h>
 
 #include "firebase_storage_plugin.h"
 
 void FirebaseStoragePluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
-  firebase_storage_windows::FirebaseStoragePlugin::RegisterWithRegistrar(
+  firebase_storage_linux::FirebaseStoragePlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
-          ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
+          ->GetRegistrar<flutter::PluginRegistrarDesktop>(registrar));
 }

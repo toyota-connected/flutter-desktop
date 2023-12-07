@@ -42,9 +42,9 @@ function(COMPILER_FLAGS_APPEND scope add_val conflict_match)
     endif ()
 endfunction(COMPILER_FLAGS_APPEND)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_EXTENSIONS YES)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
@@ -117,6 +117,7 @@ check_ipo_supported(
         OUTPUT IPO_SUPPORT_OUTPUT
         LANGUAGES C CXX
 )
+
 if (IPO_SUPPORT_RESULT)
     message(STATUS "IPO .................... supported")
 else ()

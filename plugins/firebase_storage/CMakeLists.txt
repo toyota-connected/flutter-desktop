@@ -14,50 +14,46 @@
 # limitations under the License.
 #
 
-#
-# Firebase C++ SDK
-#
-if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
-    message(STATUS "Firebase CPP SDK Root: ${FIREBASE_CPP_SDK_ROOT_DIR}")
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(UUID REQUIRED IMPORTED_TARGET uuid)
 
-    add_library(plugin_firebase_storage STATIC
-            firebase_storage_plugin.cc
-            firebase_storage_plugin_c_api.cc
-            pigeon_messages.g.cc
-    )
-    target_include_directories(plugin_firebase_storage PRIVATE
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/app/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/storage/src/include
-    )
-    target_link_directories(plugin_firebase_storage PUBLIC
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/installations
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/messaging
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/analytics
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app_check
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/database
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/dynamic_links
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/remote_config
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/auth
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app/rest
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/storage
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/functions
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/gma
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/zlib-build
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/flatbuffers-build
-            platform_desktop
-    )
-    target_link_libraries(plugin_firebase_storage PUBLIC
-            platform_desktop
-            firebase_storage
-            firebase_app
-            flatbuffers
-            z
-    )
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+include(FindThreads)
 
-    add_sanitizers(plugin_firebase_storage)
+add_library(plugin_firebase_storage STATIC
+        firebase_storage_plugin.cc
+        firebase_storage_plugin_c_api.cc
+        messages.g.cc
+)
 
-    if (IPO_SUPPORT_RESULT)
-        set_property(TARGET plugin_firebase_storage PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif ()
+target_compile_definitions(plugin_firebase_storage PRIVATE
+        -DINTERNAL_EXPERIMENTAL=1
+)
+
+target_include_directories(plugin_firebase_storage PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${FIREBASE_CPP_SDK_DIR}/app/src/include
+        ${FIREBASE_CPP_SDK_DIR}/storage/src/include
+)
+
+target_link_directories(plugin_firebase_storage PUBLIC
+        ${FIREBASE_SDK_LIBDIR}/app
+        ${FIREBASE_SDK_LIBDIR}/storage
+        ${FIREBASE_SDK_LIBDIR}/external/src/curl-build
+        ${FIREBASE_SDK_LIBDIR}/external/src/flatbuffers-build
+        ${FIREBASE_SDK_LIBDIR}/external/src/zlib-build
+        ${FIREBASE_SDK_LIBDIR}/external/src/boringssl
+)
+
+target_link_libraries(plugin_firebase_storage PUBLIC
+        plugin_firebase_core
+        firebase_sdk
+        PkgConfig::UUID
+        Threads::Threads
+)
+
+add_sanitizers(plugin_firebase_storage)
+
+if (IPO_SUPPORT_RESULT)
+    set_property(TARGET plugin_firebase_storage PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()

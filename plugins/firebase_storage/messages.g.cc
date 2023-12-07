@@ -17,7 +17,7 @@
 #include <optional>
 #include <string>
 
-namespace firebase_storage_windows {
+namespace firebase_storage_linux {
 using flutter::BasicMessageChannel;
 using flutter::CustomEncodableValue;
 using flutter::EncodableList;
@@ -1554,4 +1554,4 @@ EncodableValue FirebaseStorageHostApi::WrapError(const FlutterError& error) {
                                       error.details()});
 }
 
-}  // namespace firebase_storage_windows
+}  // namespace firebase_storage_linux

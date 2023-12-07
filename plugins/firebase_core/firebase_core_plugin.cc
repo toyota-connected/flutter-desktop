@@ -6,12 +6,11 @@
 #include "firebase_core_plugin.h"
 
 #include "firebase/app.h"
-#include "firebase_core.h"
+#include "messages.g.h"
 
 #include <flutter/plugin_registrar.h>
 #include <flutter/standard_method_codec.h>
 
-#include <future>
 #include <memory>
 #include <string>
 #include <vector>

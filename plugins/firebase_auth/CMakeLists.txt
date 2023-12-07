@@ -14,51 +14,49 @@
 # limitations under the License.
 #
 
-#
-# Firebase C++ SDK
-#
-if (EXISTS ${FIREBASE_CPP_SDK_ROOT_DIR})
-    message(STATUS "Firebase CPP SDK Root: ${FIREBASE_CPP_SDK_ROOT_DIR}")
+include(FindPkgConfig)
+pkg_check_modules(SECRET REQUIRED IMPORTED_TARGET libsecret-1)
 
-    add_library(plugin_firebase_auth STATIC
-            firebase_auth_plugin.cc
-            firebase_auth_plugin_c_api.cc
-            messages.g.cc
-    )
-    target_include_directories(plugin_firebase_auth PRIVATE
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/app/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/auth/src/include
-            ${FIREBASE_CPP_SDK_ROOT_DIR}/database/src/include
-    )
-    target_link_directories(plugin_firebase_auth PUBLIC
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/installations
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/messaging
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/analytics
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app_check
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/database
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/dynamic_links
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/remote_config
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/auth
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app/rest
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/app
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/storage
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/functions
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/gma
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/zlib-build
-            ${FIREBASE_CPP_SDK_BINARY_DIR}/external/src/flatbuffers-build
-            platform_desktop
-    )
-    target_link_libraries(plugin_firebase_auth PUBLIC
-            platform_desktop
-            firebase_auth
-            firebase_app
-            flatbuffers
-            z
-    )
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+include(FindThreads)
 
-    add_sanitizers(plugin_firebase_core)
+add_library(plugin_firebase_auth STATIC
+        firebase_auth_plugin.cc
+        firebase_auth_plugin_c_api.cc
+        messages.g.cc
+)
 
-    if (IPO_SUPPORT_RESULT)
-        set_property(TARGET plugin_firebase_core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif ()
+target_compile_definitions(plugin_firebase_auth PRIVATE INTERNAL_EXPERIMENTAL)
+
+target_include_directories(plugin_firebase_auth PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${FIREBASE_CPP_SDK_DIR}/app/src/include
+        ${FIREBASE_CPP_SDK_DIR}/auth/src/include
+)
+
+target_link_directories(plugin_firebase_auth PUBLIC
+        ${FIREBASE_SDK_LIBDIR}/app
+        ${FIREBASE_SDK_LIBDIR}/app/rest
+        ${FIREBASE_SDK_LIBDIR}/auth
+        ${FIREBASE_SDK_LIBDIR}/external/src/curl-build
+        ${FIREBASE_SDK_LIBDIR}/external/src/flatbuffers-build
+        ${FIREBASE_SDK_LIBDIR}/external/src/zlib-build
+        ${FIREBASE_SDK_LIBDIR}/external/src/boringssl
+)
+
+target_link_libraries(plugin_firebase_auth PUBLIC
+        firebase_auth
+        plugin_firebase_core
+        firebase_app
+        firebase_rest_lib
+        flatbuffers
+        curl ssl crypto z
+        PkgConfig::SECRET
+        Threads::Threads
+)
+
+add_sanitizers(plugin_firebase_auth)
+
+if (IPO_SUPPORT_RESULT)
+    set_property(TARGET plugin_firebase_auth PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif ()

@@ -5,9 +5,9 @@
 #ifndef PLUGIN_VERSION_CONFIG_H
 #define PLUGIN_VERSION_CONFIG_H
 
-namespace firebase_auth_linux {
+namespace firebase_storage_linux {
 
-std::string getPluginVersion() { return "@PLUGIN_VERSION@"; }
-}  // namespace firebase_auth_linux
+std::string getPluginVersion() { return "11.5.3"; }
+}  // namespace firebase_storage_linux
 
 #endif  // PLUGIN_VERSION_CONFIG_H
