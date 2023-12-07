@@ -8,6 +8,7 @@ Checkout this repo and run
     git submodule update --init --recursive
     cd third_party/flutter
     git apply ../../patches/0001-Support-Linux.patch
+    git apply ../../patches/0001-Linux-compat-for-event_channel.h.patch
 
 Build
 mkdir build && cd build
