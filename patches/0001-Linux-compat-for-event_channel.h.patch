@@ -1,0 +1,27 @@
+From 8d37a89e803f075fd4c7082736caacd316948894 Mon Sep 17 00:00:00 2001
+From: Joel Winarske <joel.winarske@toyotaconnected.com>
+Date: Thu, 7 Dec 2023 10:29:16 -0600
+Subject: [PATCH] Linux compat for event_channel.h
+
+Signed-off-by: Joel Winarske <joel.winarske@toyotaconnected.com>
+---
+ .../common/client_wrapper/include/flutter/event_channel.h      | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/shell/platform/common/client_wrapper/include/flutter/event_channel.h b/shell/platform/common/client_wrapper/include/flutter/event_channel.h
+index 1ff577a76d..1a24e3f8da 100644
+--- a/shell/platform/common/client_wrapper/include/flutter/event_channel.h
++++ b/shell/platform/common/client_wrapper/include/flutter/event_channel.h
+@@ -91,8 +91,7 @@ class EventChannel {
+               if (error) {
+                 std::cerr << "Failed to cancel existing stream: "
+                           << (error->error_code) << ", "
+-                          << (error->error_message) << ", "
+-                          << (error->error_details);
++                          << (error->error_message);
+               }
+             }
+             is_listening = true;
+-- 
+2.25.1
+
