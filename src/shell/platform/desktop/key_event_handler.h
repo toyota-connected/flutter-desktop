@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_KEY_EVENT_HANDLER_H_
-#define FLUTTER_SHELL_PLATFORM_DESKTOP_KEY_EVENT_HANDLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_KEY_EVENT_HANDLER_H
+#define FLUTTER_SHELL_PLATFORM_DESKTOP_KEY_EVENT_HANDLER_H
 
 #include <memory>
 
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
-#include "shell/platform/desktop/keyboard_hook_handler.h"
 #include "rapidjson/document.h"
+#include "shell/platform/desktop/keyboard_hook_handler.h"
 
 namespace flutter {
 
@@ -40,4 +40,4 @@ class KeyEventHandler final : public KeyboardHookHandler {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_KEY_EVENT_HANDLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_KEY_EVENT_HANDLER_H

@@ -87,7 +87,7 @@ void FirebaseCorePlugin::InitializeApp(
     const PigeonFirebaseOptions& initialize_app_request,
     std::function<void(ErrorOr<PigeonInitializeResponse> reply)> result) {
   // Create an app
-  App* app =
+  const App* app =
       App::Create(PigeonFirebaseOptionsToAppOptions(initialize_app_request),
                   app_name.c_str());
 
@@ -99,7 +99,7 @@ void FirebaseCorePlugin::InitializeCore(
     std::function<void(ErrorOr<flutter::EncodableList> reply)> result) {
   // TODO: Missing function to get the list of currently initialized apps
   std::vector<PigeonInitializeResponse> initializedApps;
-  std::vector<App*> all_apps = App::GetApps();
+  const std::vector<App*> all_apps = App::GetApps();
   for (const App* app : all_apps) {
     initializedApps.push_back(AppToPigeonInitializeResponse(*app));
   }

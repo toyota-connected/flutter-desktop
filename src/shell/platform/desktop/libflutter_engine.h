@@ -20,69 +20,66 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
-struct LibFlutterEngineExports
-{
-    LibFlutterEngineExports() = default;
-    explicit LibFlutterEngineExports(void* lib);
+struct LibFlutterEngineExports {
+  LibFlutterEngineExports() = default;
+  explicit LibFlutterEngineExports(void* lib);
 
-    FlutterEngineCreateAOTDataFnPtr CreateAOTData = nullptr;
-    FlutterEngineCollectAOTDataFnPtr CollectAOTData = nullptr;
-    FlutterEngineRunFnPtr Run = nullptr;
-    FlutterEngineShutdownFnPtr Shutdown = nullptr;
-    FlutterEngineInitializeFnPtr Initialize = nullptr;
-    FlutterEngineDeinitializeFnPtr Deinitialize = nullptr;
-    FlutterEngineRunInitializedFnPtr RunInitialized = nullptr;
-    FlutterEngineSendWindowMetricsEventFnPtr SendWindowMetricsEvent = nullptr;
-    FlutterEngineSendPointerEventFnPtr SendPointerEvent = nullptr;
-    FlutterEngineSendKeyEventFnPtr SendKeyEvent = nullptr;
-    FlutterEngineSendPlatformMessageFnPtr SendPlatformMessage = nullptr;
-    FlutterEnginePlatformMessageCreateResponseHandleFnPtr
-    PlatformMessageCreateResponseHandle = nullptr;
-    FlutterEnginePlatformMessageReleaseResponseHandleFnPtr
-    PlatformMessageReleaseResponseHandle = nullptr;
-    FlutterEngineSendPlatformMessageResponseFnPtr SendPlatformMessageResponse =
-        nullptr;
-    FlutterEngineRegisterExternalTextureFnPtr RegisterExternalTexture = nullptr;
-    FlutterEngineUnregisterExternalTextureFnPtr UnregisterExternalTexture =
-        nullptr;
-    FlutterEngineMarkExternalTextureFrameAvailableFnPtr
-    MarkExternalTextureFrameAvailable = nullptr;
-    FlutterEngineUpdateSemanticsEnabledFnPtr UpdateSemanticsEnabled = nullptr;
-    FlutterEngineUpdateAccessibilityFeaturesFnPtr UpdateAccessibilityFeatures =
-        nullptr;
-    FlutterEngineDispatchSemanticsActionFnPtr DispatchSemanticsAction = nullptr;
-    FlutterEngineOnVsyncFnPtr OnVsync = nullptr;
-    FlutterEngineReloadSystemFontsFnPtr ReloadSystemFonts = nullptr;
-    FlutterEngineTraceEventDurationBeginFnPtr TraceEventDurationBegin = nullptr;
-    FlutterEngineTraceEventDurationEndFnPtr TraceEventDurationEnd = nullptr;
-    FlutterEngineTraceEventInstantFnPtr TraceEventInstant = nullptr;
-    FlutterEnginePostRenderThreadTaskFnPtr PostRenderThreadTask = nullptr;
-    FlutterEngineGetCurrentTimeFnPtr GetCurrentTime = nullptr;
-    FlutterEngineRunTaskFnPtr RunTask = nullptr;
-    FlutterEngineUpdateLocalesFnPtr UpdateLocales = nullptr;
-    FlutterEngineRunsAOTCompiledDartCodeFnPtr RunsAOTCompiledDartCode = nullptr;
-    FlutterEnginePostDartObjectFnPtr PostDartObject = nullptr;
-    FlutterEngineNotifyLowMemoryWarningFnPtr NotifyLowMemoryWarning = nullptr;
-    FlutterEnginePostCallbackOnAllNativeThreadsFnPtr
-    PostCallbackOnAllNativeThreads = nullptr;
-    FlutterEngineNotifyDisplayUpdateFnPtr NotifyDisplayUpdate = nullptr;
-    FlutterEngineScheduleFrameFnPtr ScheduleFrame = nullptr;
-    FlutterEngineSetNextFrameCallbackFnPtr SetNextFrameCallback = nullptr;
+  FlutterEngineCreateAOTDataFnPtr CreateAOTData = nullptr;
+  FlutterEngineCollectAOTDataFnPtr CollectAOTData = nullptr;
+  FlutterEngineRunFnPtr Run = nullptr;
+  FlutterEngineShutdownFnPtr Shutdown = nullptr;
+  FlutterEngineInitializeFnPtr Initialize = nullptr;
+  FlutterEngineDeinitializeFnPtr Deinitialize = nullptr;
+  FlutterEngineRunInitializedFnPtr RunInitialized = nullptr;
+  FlutterEngineSendWindowMetricsEventFnPtr SendWindowMetricsEvent = nullptr;
+  FlutterEngineSendPointerEventFnPtr SendPointerEvent = nullptr;
+  FlutterEngineSendKeyEventFnPtr SendKeyEvent = nullptr;
+  FlutterEngineSendPlatformMessageFnPtr SendPlatformMessage = nullptr;
+  FlutterEnginePlatformMessageCreateResponseHandleFnPtr
+      PlatformMessageCreateResponseHandle = nullptr;
+  FlutterEnginePlatformMessageReleaseResponseHandleFnPtr
+      PlatformMessageReleaseResponseHandle = nullptr;
+  FlutterEngineSendPlatformMessageResponseFnPtr SendPlatformMessageResponse =
+      nullptr;
+  FlutterEngineRegisterExternalTextureFnPtr RegisterExternalTexture = nullptr;
+  FlutterEngineUnregisterExternalTextureFnPtr UnregisterExternalTexture =
+      nullptr;
+  FlutterEngineMarkExternalTextureFrameAvailableFnPtr
+      MarkExternalTextureFrameAvailable = nullptr;
+  FlutterEngineUpdateSemanticsEnabledFnPtr UpdateSemanticsEnabled = nullptr;
+  FlutterEngineUpdateAccessibilityFeaturesFnPtr UpdateAccessibilityFeatures =
+      nullptr;
+  FlutterEngineDispatchSemanticsActionFnPtr DispatchSemanticsAction = nullptr;
+  FlutterEngineOnVsyncFnPtr OnVsync = nullptr;
+  FlutterEngineReloadSystemFontsFnPtr ReloadSystemFonts = nullptr;
+  FlutterEngineTraceEventDurationBeginFnPtr TraceEventDurationBegin = nullptr;
+  FlutterEngineTraceEventDurationEndFnPtr TraceEventDurationEnd = nullptr;
+  FlutterEngineTraceEventInstantFnPtr TraceEventInstant = nullptr;
+  FlutterEnginePostRenderThreadTaskFnPtr PostRenderThreadTask = nullptr;
+  FlutterEngineGetCurrentTimeFnPtr GetCurrentTime = nullptr;
+  FlutterEngineRunTaskFnPtr RunTask = nullptr;
+  FlutterEngineUpdateLocalesFnPtr UpdateLocales = nullptr;
+  FlutterEngineRunsAOTCompiledDartCodeFnPtr RunsAOTCompiledDartCode = nullptr;
+  FlutterEnginePostDartObjectFnPtr PostDartObject = nullptr;
+  FlutterEngineNotifyLowMemoryWarningFnPtr NotifyLowMemoryWarning = nullptr;
+  FlutterEnginePostCallbackOnAllNativeThreadsFnPtr
+      PostCallbackOnAllNativeThreads = nullptr;
+  FlutterEngineNotifyDisplayUpdateFnPtr NotifyDisplayUpdate = nullptr;
+  FlutterEngineScheduleFrameFnPtr ScheduleFrame = nullptr;
+  FlutterEngineSetNextFrameCallbackFnPtr SetNextFrameCallback = nullptr;
 };
 
-class LibFlutterEngine
-{
-public:
-    static bool IsPresent(const char* library_path = nullptr)
-    {
-        std::cerr << "library_path: " << library_path << std::endl;
-        return loadExports(library_path) != nullptr;
-    }
+class LibFlutterEngine {
+ public:
+  static bool IsPresent(const char* library_path = nullptr) {
+    std::cerr << "library_path: " << library_path << std::endl;
+    return loadExports(library_path) != nullptr;
+  }
 
-    LibFlutterEngineExports* operator->() const;
+  LibFlutterEngineExports* operator->() const;
 
-private:
-    static LibFlutterEngineExports* loadExports(const char* library_path);
+ private:
+  static LibFlutterEngineExports* loadExports(const char* library_path);
 };
 
 extern LibFlutterEngine LibFlutterEngine;

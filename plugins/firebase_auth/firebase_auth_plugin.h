@@ -2,15 +2,14 @@
  * Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
  * for details. All rights reserved. Use of this source code is governed by a
  * BSD-style license that can be found in the LICENSE file.
+ * Copyright 2023, Toyota Connected North America
  */
 
-#ifndef FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H_
-#define FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H_
+#ifndef FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H
+#define FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H
 
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_desktop.h>
-
-#include <memory>
 
 #include "firebase/app.h"
 #include "firebase/auth.h"
@@ -30,7 +29,7 @@ class FirebaseAuthPlugin : public flutter::Plugin,
 
   FirebaseAuthPlugin();
 
-  virtual ~FirebaseAuthPlugin();
+  ~FirebaseAuthPlugin() override;
 
   // Disallow copy and assign.
   FirebaseAuthPlugin(const FirebaseAuthPlugin&) = delete;
@@ -40,9 +39,9 @@ class FirebaseAuthPlugin : public flutter::Plugin,
   static std::string GetAuthErrorCode(AuthError authError);
   static FlutterError ParseError(const firebase::FutureBase& future);
 
-  static PigeonUserDetails ParseUserDetails(const firebase::auth::User user);
+  static PigeonUserDetails ParseUserDetails(firebase::auth::User user);
   static PigeonAdditionalUserInfo ParseAdditionalUserInfo(
-      const firebase::auth::AdditionalUserInfo user);
+      const firebase::auth::AdditionalUserInfo& user);
   static flutter::EncodableMap ConvertToEncodableMap(
       const std::map<firebase::Variant, firebase::Variant>& originalMap);
   static flutter::EncodableValue ConvertToEncodableValue(
@@ -54,130 +53,155 @@ class FirebaseAuthPlugin : public flutter::Plugin,
       firebase::auth::UserInfoInterface* userInfo);
 
   // FirebaseAuthHostApi methods.
-  virtual void RegisterIdTokenListener(
+  void RegisterIdTokenListener(
       const AuthPigeonFirebaseApp& app,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void RegisterAuthStateListener(
+  void RegisterAuthStateListener(
       const AuthPigeonFirebaseApp& app,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void UseEmulator(
-      const AuthPigeonFirebaseApp& app, const std::string& host, int64_t port,
+  void UseEmulator(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& host,
+      int64_t port,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void ApplyActionCode(
-      const AuthPigeonFirebaseApp& app, const std::string& code,
+  void ApplyActionCode(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& code,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void CheckActionCode(
-      const AuthPigeonFirebaseApp& app, const std::string& code,
+  void CheckActionCode(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& code,
       std::function<void(ErrorOr<PigeonActionCodeInfo> reply)> result) override;
-  virtual void ConfirmPasswordReset(
-      const AuthPigeonFirebaseApp& app, const std::string& code,
+  void ConfirmPasswordReset(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& code,
       const std::string& new_password,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void CreateUserWithEmailAndPassword(
-      const AuthPigeonFirebaseApp& app, const std::string& email,
+  void CreateUserWithEmailAndPassword(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& email,
       const std::string& password,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignInAnonymously(
+  void SignInAnonymously(
       const AuthPigeonFirebaseApp& app,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignInWithCredential(
-      const AuthPigeonFirebaseApp& app, const flutter::EncodableMap& input,
+  void SignInWithCredential(
+      const AuthPigeonFirebaseApp& app,
+      const flutter::EncodableMap& input,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignInWithCustomToken(
-      const AuthPigeonFirebaseApp& app, const std::string& token,
+  void SignInWithCustomToken(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& token,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignInWithEmailAndPassword(
-      const AuthPigeonFirebaseApp& app, const std::string& email,
+  void SignInWithEmailAndPassword(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& email,
       const std::string& password,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignInWithEmailLink(
-      const AuthPigeonFirebaseApp& app, const std::string& email,
+  void SignInWithEmailLink(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& email,
       const std::string& email_link,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignInWithProvider(
+  void SignInWithProvider(
       const AuthPigeonFirebaseApp& app,
       const PigeonSignInProvider& sign_in_provider,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void SignOut(
+  void SignOut(
       const AuthPigeonFirebaseApp& app,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void FetchSignInMethodsForEmail(
-      const AuthPigeonFirebaseApp& app, const std::string& email,
+  void FetchSignInMethodsForEmail(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& email,
       std::function<void(ErrorOr<flutter::EncodableList> reply)> result)
       override;
-  virtual void SendPasswordResetEmail(
-      const AuthPigeonFirebaseApp& app, const std::string& email,
+  void SendPasswordResetEmail(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& email,
       const PigeonActionCodeSettings* action_code_settings,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void SendSignInLinkToEmail(
-      const AuthPigeonFirebaseApp& app, const std::string& email,
+  void SendSignInLinkToEmail(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& email,
       const PigeonActionCodeSettings& action_code_settings,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void SetLanguageCode(
-      const AuthPigeonFirebaseApp& app, const std::string* language_code,
+  void SetLanguageCode(
+      const AuthPigeonFirebaseApp& app,
+      const std::string* language_code,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void SetSettings(
+  void SetSettings(
       const AuthPigeonFirebaseApp& app,
       const PigeonFirebaseAuthSettings& settings,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void VerifyPasswordResetCode(
-      const AuthPigeonFirebaseApp& app, const std::string& code,
+  void VerifyPasswordResetCode(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& code,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void VerifyPhoneNumber(
+  void VerifyPhoneNumber(
       const AuthPigeonFirebaseApp& app,
       const PigeonVerifyPhoneNumberRequest& request,
       std::function<void(ErrorOr<std::string> reply)> result) override;
 
   // FirebaseAuthUserHostApi methods.
-  virtual void Delete(
+  void Delete(
       const AuthPigeonFirebaseApp& app,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void GetIdToken(
-      const AuthPigeonFirebaseApp& app, bool force_refresh,
+  void GetIdToken(
+      const AuthPigeonFirebaseApp& app,
+      bool force_refresh,
       std::function<void(ErrorOr<PigeonIdTokenResult> reply)> result) override;
-  virtual void LinkWithCredential(
-      const AuthPigeonFirebaseApp& app, const flutter::EncodableMap& input,
+  void LinkWithCredential(
+      const AuthPigeonFirebaseApp& app,
+      const flutter::EncodableMap& input,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void LinkWithProvider(
+  void LinkWithProvider(
       const AuthPigeonFirebaseApp& app,
       const PigeonSignInProvider& sign_in_provider,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void ReauthenticateWithCredential(
-      const AuthPigeonFirebaseApp& app, const flutter::EncodableMap& input,
+  void ReauthenticateWithCredential(
+      const AuthPigeonFirebaseApp& app,
+      const flutter::EncodableMap& input,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void ReauthenticateWithProvider(
+  void ReauthenticateWithProvider(
       const AuthPigeonFirebaseApp& app,
       const PigeonSignInProvider& sign_in_provider,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void Reload(
+  void Reload(
       const AuthPigeonFirebaseApp& app,
       std::function<void(ErrorOr<PigeonUserDetails> reply)> result) override;
-  virtual void SendEmailVerification(
+  void SendEmailVerification(
       const AuthPigeonFirebaseApp& app,
       const PigeonActionCodeSettings* action_code_settings,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void Unlink(
-      const AuthPigeonFirebaseApp& app, const std::string& provider_id,
+  void Unlink(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& provider_id,
       std::function<void(ErrorOr<PigeonUserCredential> reply)> result) override;
-  virtual void UpdateEmail(
-      const AuthPigeonFirebaseApp& app, const std::string& new_email,
+  void UpdateEmail(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& new_email,
       std::function<void(ErrorOr<PigeonUserDetails> reply)> result) override;
-  virtual void UpdatePassword(
-      const AuthPigeonFirebaseApp& app, const std::string& new_password,
+  void UpdatePassword(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& new_password,
       std::function<void(ErrorOr<PigeonUserDetails> reply)> result) override;
-  virtual void UpdatePhoneNumber(
-      const AuthPigeonFirebaseApp& app, const flutter::EncodableMap& input,
+  void UpdatePhoneNumber(
+      const AuthPigeonFirebaseApp& app,
+      const flutter::EncodableMap& input,
       std::function<void(ErrorOr<PigeonUserDetails> reply)> result) override;
-  virtual void UpdateProfile(
-      const AuthPigeonFirebaseApp& app, const PigeonUserProfile& profile,
+  void UpdateProfile(
+      const AuthPigeonFirebaseApp& app,
+      const PigeonUserProfile& profile,
       std::function<void(ErrorOr<PigeonUserDetails> reply)> result) override;
-  virtual void VerifyBeforeUpdateEmail(
-      const AuthPigeonFirebaseApp& app, const std::string& new_email,
+  void VerifyBeforeUpdateEmail(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& new_email,
       const PigeonActionCodeSettings* action_code_settings,
       std::function<void(std::optional<FlutterError> reply)> result) override;
 
-  virtual void RevokeTokenWithAuthorizationCode(
-      const AuthPigeonFirebaseApp& app, const std::string& authorization_code,
+  void RevokeTokenWithAuthorizationCode(
+      const AuthPigeonFirebaseApp& app,
+      const std::string& authorization_code,
       std::function<void(std::optional<FlutterError> reply)> result) override;
 
  private:
@@ -186,4 +210,4 @@ class FirebaseAuthPlugin : public flutter::Plugin,
 
 }  // namespace firebase_auth_linux
 
-#endif  // FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H_
+#endif  // FLUTTER_PLUGIN_FIREBASE_AUTH_PLUGIN_H

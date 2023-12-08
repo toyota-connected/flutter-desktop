@@ -2,10 +2,11 @@
  * Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
  * for details. All rights reserved. Use of this source code is governed by a
  * BSD-style license that can be found in the LICENSE file.
+ * Copyright 2023, Toyota Connected North America
  */
 
-#ifndef FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_C_API_H_
-#define FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_C_API_H_
+#ifndef FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_C_API_H
+#define FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_C_API_H
 
 #include <flutter_plugin_registrar.h>
 
@@ -26,4 +27,4 @@ FLUTTER_PLUGIN_EXPORT void FirebaseStoragePluginCApiRegisterWithRegistrar(
 }  // extern "C"
 #endif
 
-#endif /* FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_C_API_H_ */
+#endif /* FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_C_API_H */

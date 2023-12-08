@@ -4,12 +4,12 @@
 
 * requires firebase cpp sdk: https://github.com/firebase/firebase-cpp-sdk to exist and be built prior.
 
-* Set the following variables to build
+* This plugin is included when the following variable is set:
 
 ```
-  -DBUILD_PLUGIN_FIREBASE_CORE=ON
-  -DFIREBASE_CPP_SDK_ROOT_DIR="/mnt/raid10/firebase-cpp-sdk"
-  -DFIREBASE_CPP_SDK_BINARY_DIR="/mnt/raid10/firebase-cpp-sdk/build"
+  -DBUILD_PLUGIN_CLOUD_FIRESTORE=ON
+  -DBUILD_PLUGIN_CLOUD_AUTH=ON
+  -DBUILD_PLUGIN_CLOUD_STORAGE=ON    
 ```
 
 ## Building Firebase C++ SDK

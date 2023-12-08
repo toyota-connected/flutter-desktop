@@ -4,8 +4,8 @@
  * BSD-style license that can be found in the LICENSE file.
  */
 
-#ifndef FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H_
-#define FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H_
+#ifndef FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H
+#define FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H
 
 #include <flutter/event_channel.h>
 #include <flutter/method_channel.h>
@@ -28,7 +28,7 @@ class FirebaseStoragePlugin : public flutter::Plugin,
 
   FirebaseStoragePlugin();
 
-  virtual ~FirebaseStoragePlugin();
+  ~FirebaseStoragePlugin() override;
 
   // Disallow copy and assign.
   FirebaseStoragePlugin(const FirebaseStoragePlugin&) = delete;
@@ -40,84 +40,84 @@ class FirebaseStoragePlugin : public flutter::Plugin,
   static FlutterError ParseError(const firebase::FutureBase& future);
 
   // FirebaseStorageHostApi
-  virtual void GetReferencebyPath(
+  void GetReferencebyPath(
       const PigeonStorageFirebaseApp& app, const std::string& path,
       const std::string* bucket,
       std::function<void(ErrorOr<PigeonStorageReference> reply)> result)
       override;
-  virtual void SetMaxOperationRetryTime(
+  void SetMaxOperationRetryTime(
       const PigeonStorageFirebaseApp& app, int64_t time,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void SetMaxUploadRetryTime(
+  void SetMaxUploadRetryTime(
       const PigeonStorageFirebaseApp& app, int64_t time,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void SetMaxDownloadRetryTime(
+  void SetMaxDownloadRetryTime(
       const PigeonStorageFirebaseApp& app, int64_t time,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void UseStorageEmulator(
+  void UseStorageEmulator(
       const PigeonStorageFirebaseApp& app, const std::string& host,
       int64_t port,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void ReferenceDelete(
+  void ReferenceDelete(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference,
       std::function<void(std::optional<FlutterError> reply)> result) override;
-  virtual void ReferenceGetDownloadURL(
+  void ReferenceGetDownloadURL(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void ReferenceGetMetaData(
+  void ReferenceGetMetaData(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference,
       std::function<void(ErrorOr<PigeonFullMetaData> reply)> result) override;
-  virtual void ReferenceList(
+  void ReferenceList(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference, const PigeonListOptions& options,
       std::function<void(ErrorOr<PigeonListResult> reply)> result) override;
-  virtual void ReferenceListAll(
+  void ReferenceListAll(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference,
       std::function<void(ErrorOr<PigeonListResult> reply)> result) override;
-  virtual void ReferenceGetData(
+  void ReferenceGetData(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference, int64_t max_size,
       std::function<void(ErrorOr<std::optional<std::vector<uint8_t>>> reply)>
           result) override;
-  virtual void ReferencePutData(
+  void ReferencePutData(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference, const std::vector<uint8_t>& data,
       const PigeonSettableMetadata& settable_meta_data, int64_t handle,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void ReferencePutString(
+  void ReferencePutString(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference, const std::string& data,
       int64_t format, const PigeonSettableMetadata& settable_meta_data,
       int64_t handle,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void ReferencePutFile(
+  void ReferencePutFile(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference, const std::string& file_path,
       const PigeonSettableMetadata& settable_meta_data, int64_t handle,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void ReferenceDownloadFile(
+  void ReferenceDownloadFile(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference, const std::string& file_path,
       int64_t handle,
       std::function<void(ErrorOr<std::string> reply)> result) override;
-  virtual void ReferenceUpdateMetadata(
+  void ReferenceUpdateMetadata(
       const PigeonStorageFirebaseApp& app,
       const PigeonStorageReference& reference,
       const PigeonSettableMetadata& metadata,
       std::function<void(ErrorOr<PigeonFullMetaData> reply)> result) override;
-  virtual void TaskPause(
+  void TaskPause(
       const PigeonStorageFirebaseApp& app, int64_t handle,
       std::function<void(ErrorOr<flutter::EncodableMap> reply)> result)
       override;
-  virtual void TaskResume(
+  void TaskResume(
       const PigeonStorageFirebaseApp& app, int64_t handle,
       std::function<void(ErrorOr<flutter::EncodableMap> reply)> result)
       override;
-  virtual void TaskCancel(
+  void TaskCancel(
       const PigeonStorageFirebaseApp& app, int64_t handle,
       std::function<void(ErrorOr<flutter::EncodableMap> reply)> result)
       override;
@@ -138,4 +138,4 @@ class FirebaseStoragePlugin : public flutter::Plugin,
 
 }  // namespace firebase_storage_linux
 
-#endif /* FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H_ */
+#endif /* FLUTTER_PLUGIN_FIREBASE_STORAGE_PLUGIN_H */

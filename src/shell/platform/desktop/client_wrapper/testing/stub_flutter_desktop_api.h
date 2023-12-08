@@ -98,7 +98,8 @@ class StubFlutterDesktopApi {
 class ScopedStubFlutterDesktopApi {
  public:
   // Calls SetTestFlutterStub with |stub|.
-  explicit ScopedStubFlutterDesktopApi(std::unique_ptr<StubFlutterDesktopApi> stub);
+  explicit ScopedStubFlutterDesktopApi(
+      std::unique_ptr<StubFlutterDesktopApi> stub);
 
   // Restores the previous test stub.
   ~ScopedStubFlutterDesktopApi();

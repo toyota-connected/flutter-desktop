@@ -88,9 +88,13 @@ LibFlutterEngineExports* LibFlutterEngine::loadExports(
   static LibFlutterEngineExports exports = [&] {
     void* lib;
 
-    if (GetProcAddress(RTLD_DEFAULT,
-                       "FlutterEngineMarkExternalTextureFrameAvailable"))  // Search the global scope
-                                       // for pre-loaded library.
+    if (GetProcAddress(
+            RTLD_DEFAULT,
+            "FlutterEngineMarkExternalTextureFrameAvailable"))  // Search the
+                                                                // global scope
+                                                                // for
+                                                                // pre-loaded
+                                                                // library.
     {
       lib = RTLD_DEFAULT;
     } else {

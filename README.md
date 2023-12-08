@@ -11,9 +11,10 @@ Checkout this repo and run
     git apply ../../patches/0001-Linux-compat-for-event_channel.h.patch
 
 Build
-mkdir build && cd build
-cmake .. -GNinja
-ninja -j`nproc`
+
+    mkdir build && cd build
+    cmake .. -GNinja
+    ninja -j`nproc`
 
 Create bundle folder following folder layout
 

@@ -22,11 +22,11 @@ add_library(plugin_firebase_core STATIC
 
 target_include_directories(plugin_firebase_core PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${FIREBASE_CPP_SDK_DIR}/app/src/include
 )
 
 target_link_libraries(plugin_firebase_core PUBLIC
         platform_desktop
+        firebase_sdk
 )
 
 add_sanitizers(plugin_firebase_core)

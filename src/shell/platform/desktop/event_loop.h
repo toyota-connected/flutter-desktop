@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_GLFW_EVENT_LOOP_H_
-#define FLUTTER_SHELL_PLATFORM_GLFW_EVENT_LOOP_H_
+#ifndef FLUTTER_SHELL_PLATFORM_GLFW_EVENT_LOOP_H
+#define FLUTTER_SHELL_PLATFORM_GLFW_EVENT_LOOP_H
 
 #include <chrono>
 #include <deque>
@@ -17,13 +17,13 @@
 namespace flutter {
 // An abstract event loop.
 class EventLoop {
-public:
+ public:
   using TaskExpiredCallback = std::function<void(const FlutterTask*)>;
 
   // Creates an event loop running on the given thread, calling
   // |on_task_expired| to run tasks.
   EventLoop(std::thread::id main_thread_id,
-            const TaskExpiredCallback& on_task_expired);
+            TaskExpiredCallback  on_task_expired);
 
   virtual ~EventLoop();
 
@@ -32,7 +32,7 @@ public:
   EventLoop& operator=(const EventLoop&) = delete;
 
   // Returns if the current thread is the thread used by this event loop.
-  bool RunsTasksOnCurrentThread() const;
+  [[nodiscard]] bool RunsTasksOnCurrentThread() const;
 
   // Waits for the next event, processes it, and returns.
   //
@@ -45,7 +45,7 @@ public:
   // Posts a Flutter engine task to the event loop for delayed execution.
   void PostTask(FlutterTask flutter_task, uint64_t flutter_target_time_nanos);
 
-protected:
+ protected:
   using TaskTimePoint = std::chrono::steady_clock::time_point;
 
   // Returns the timepoint corresponding to a Flutter task time.
@@ -63,9 +63,9 @@ protected:
   virtual void Wake() = 0;
 
   struct Task {
-    uint64_t order;
+    uint64_t order{};
     TaskTimePoint fire_time;
-    FlutterTask task;
+    FlutterTask task{};
 
     struct Comparer {
       bool operator()(const Task& a, const Task& b) const {
@@ -82,6 +82,6 @@ protected:
   std::mutex task_queue_mutex_;
   std::priority_queue<Task, std::deque<Task>, Task::Comparer> task_queue_;
 };
-} // namespace flutter
+}  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_GLFW_EVENT_LOOP_H_
+#endif  // FLUTTER_SHELL_PLATFORM_GLFW_EVENT_LOOP_H

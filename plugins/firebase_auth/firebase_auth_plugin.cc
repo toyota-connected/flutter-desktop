@@ -1,24 +1,22 @@
 // Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+// Copyright 2023, Toyota Connected North America
 
 #include "firebase_auth_plugin.h"
 
-#include <chrono>
 #include <thread>
 
 #include "firebase/app.h"
 #include "firebase/auth.h"
 #include "firebase/future.h"
 #include "firebase/log.h"
-#include "firebase/util.h"
 #include "firebase/variant.h"
 #include "firebase_auth/plugin_version.h"
 #include "firebase_core/firebase_core_plugin_c_api.h"
 #include "messages.g.h"
 
 #include <flutter/event_channel.h>
-#include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_desktop.h>
 #include <flutter/standard_method_codec.h>
 
@@ -26,7 +24,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -90,7 +87,7 @@ firebase_auth_linux::FirebaseAuthPlugin::ConvertToEncodableMap(
   for (const auto& kv : originalMap) {
     EncodableValue key = ConvertToEncodableValue(
         kv.first);  // convert std::string to EncodableValue
-    EncodableValue value = ConvertToEncodableValue(
+    const EncodableValue value = ConvertToEncodableValue(
         kv.second);             // convert FieldValue to EncodableValue
     convertedMap[key] = value;  // insert into the new map
   }
@@ -114,19 +111,20 @@ firebase_auth_linux::FirebaseAuthPlugin::ConvertToEncodableValue(
     case firebase::Variant::kTypeMutableString:
       return EncodableValue(variant.mutable_string());
     case firebase::Variant::kTypeMap:
-      return EncodableValue(
-          FirebaseAuthPlugin::ConvertToEncodableMap(variant.map()));
+      return EncodableValue(ConvertToEncodableMap(variant.map()));
     case firebase::Variant::kTypeStaticBlob:
-      return EncodableValue(variant.blob_data());
+      assert(false);
+      // TODO      return EncodableValue(variant.blob_data());
     case firebase::Variant::kTypeMutableBlob:
-      return EncodableValue(variant.mutable_blob_data());
+      assert(false);
+      // TODO      return EncodableValue(variant.mutable_blob_data());
     default:
       return EncodableValue();
   }
 }
 
 PigeonAdditionalUserInfo FirebaseAuthPlugin::ParseAdditionalUserInfo(
-    const firebase::auth::AdditionalUserInfo additionalUserInfo) {
+    const firebase::auth::AdditionalUserInfo& additionalUserInfo) {
   // Cannot know if the user is new or not with current API
   PigeonAdditionalUserInfo result = PigeonAdditionalUserInfo(false);
   result.set_profile(ConvertToEncodableMap(additionalUserInfo.profile));
@@ -166,7 +164,7 @@ flutter::EncodableList FirebaseAuthPlugin::ParseProviderData(
     output.push_back(FirebaseAuthPlugin::ParseUserInfoToMap(&userInfo));
   }
 
-  return flutter::EncodableList(output);
+  return {output};
 }
 
 flutter::EncodableValue FirebaseAuthPlugin::ParseUserInfoToMap(
@@ -293,8 +291,7 @@ std::string FirebaseAuthPlugin::GetAuthErrorCode(AuthError authError) {
 
 FlutterError FirebaseAuthPlugin::ParseError(
     const firebase::FutureBase& completed_future) {
-  const AuthError errorCode =
-      static_cast<const AuthError>(completed_future.error());
+  const auto errorCode = static_cast<const AuthError>(completed_future.error());
 
   return FlutterError(FirebaseAuthPlugin::GetAuthErrorCode(errorCode),
                       completed_future.error_message());
@@ -311,7 +308,7 @@ class FlutterIdTokenListener : public firebase::auth::IdTokenListener {
 
   void OnIdTokenChanged(Auth* auth) override {
     // Generate your ID Token
-    firebase::auth::User user = auth->current_user();
+    const firebase::auth::User user = auth->current_user();
     PigeonUserDetails userDetails = FirebaseAuthPlugin::ParseUserDetails(user);
 
     using flutter::EncodableMap;
@@ -336,7 +333,7 @@ class FlutterIdTokenListener : public firebase::auth::IdTokenListener {
 class IdTokenStreamHandler
     : public flutter::StreamHandler<flutter::EncodableValue> {
  public:
-  IdTokenStreamHandler(Auth* auth) {
+  explicit IdTokenStreamHandler(Auth* auth) {
     listener_ = nullptr;
     auth_ = auth;
   }
@@ -392,7 +389,7 @@ class FlutterAuthStateListener : public firebase::auth::AuthStateListener {
 
   void OnAuthStateChanged(Auth* auth) override {
     // Generate your ID Token
-    firebase::auth::User user = auth->current_user();
+    const firebase::auth::User user = auth->current_user();
     PigeonUserDetails userDetails = FirebaseAuthPlugin::ParseUserDetails(user);
 
     using flutter::EncodableMap;
@@ -417,7 +414,7 @@ class FlutterAuthStateListener : public firebase::auth::AuthStateListener {
 class AuthStateStreamHandler
     : public flutter::StreamHandler<flutter::EncodableValue> {
  public:
-  AuthStateStreamHandler(Auth* auth) {
+  explicit AuthStateStreamHandler(Auth* auth) {
     listener_ = nullptr;
     auth_ = auth;
   }
@@ -473,8 +470,8 @@ void FirebaseAuthPlugin::UseEmulator(
     const std::string& host,
     int64_t port,
     std::function<void(std::optional<FlutterError> reply)> result) {
-  firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
-  //TODO firebaseAuth->UseEmulator(host, static_cast<uint32_t>(port));
+  const auto firebase_auth = GetAuthFromPigeon(app);
+  firebase_auth->UseEmulator(host, static_cast<uint32_t>(port));
   result(std::nullopt);
 }
 
@@ -523,7 +520,7 @@ void FirebaseAuthPlugin::CreateUserWithEmailAndPassword(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -545,7 +542,7 @@ void FirebaseAuthPlugin::SignInAnonymously(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -595,9 +592,9 @@ firebase::auth::Credential getCredentialFromArguments(
 
   // Password Auth
   if (signInMethod == kSignInMethodPassword) {
-    std::string email =
+    const std::string email =
         std::get<std::string>(arguments[EncodableValue(kArgumentEmail)]);
-    std::string secret =
+    const std::string secret =
         std::get<std::string>(arguments[EncodableValue(kArgumentSecret)]);
     return firebase::auth::EmailAuthProvider::GetCredential(email.c_str(),
                                                             secret.c_str());
@@ -631,7 +628,7 @@ firebase::auth::Credential getCredentialFromArguments(
 
   // Twitter Auth
   if (signInMethod == kSignInMethodTwitter) {
-    std::string secret =
+    const std::string secret =
         std::get<std::string>(arguments[EncodableValue(kArgumentSecret)]);
     return firebase::auth::TwitterAuthProvider::GetCredential(idToken.c_str(),
                                                               secret.c_str());
@@ -675,9 +672,10 @@ void FirebaseAuthPlugin::SignInWithCredential(
       [result](const firebase::Future<firebase::auth::User>& completed_future) {
         if (completed_future.error() == 0) {
           // TODO: not the right return type from C++ SDK
-          PigeonUserInfo credential = ParseUserInfo(completed_future.result());
+          const PigeonUserInfo credential =
+              ParseUserInfo(completed_future.result());
           PigeonUserCredential userCredential = PigeonUserCredential();
-          PigeonUserDetails user =
+          const PigeonUserDetails user =
               PigeonUserDetails(credential, flutter::EncodableList());
           userCredential.set_user(user);
           result(userCredential);
@@ -701,7 +699,7 @@ void FirebaseAuthPlugin::SignInWithCustomToken(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -725,7 +723,7 @@ void FirebaseAuthPlugin::SignInWithEmailAndPassword(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -777,7 +775,7 @@ firebase::auth::FederatedOAuthProvider getProviderFromArguments(
     const PigeonSignInProvider& sign_in_provider) {
   firebase::auth::FederatedOAuthProviderData federatedOAuthProviderData =
       firebase::auth::FederatedOAuthProviderData(
-          sign_in_provider.provider_id().c_str(),
+          sign_in_provider.provider_id(),
           TransformEncodableList(*sign_in_provider.scopes()),
           TransformEncodableMap(*sign_in_provider.custom_parameters()));
   firebase::auth::FederatedOAuthProvider federatedAuthProvider =
@@ -801,7 +799,7 @@ void FirebaseAuthPlugin::SignInWithProvider(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -893,7 +891,7 @@ void FirebaseAuthPlugin::SetLanguageCode(
 
   if (language_code == nullptr) {
     firebaseAuth->UseAppLanguage();
-    //TODO result(firebaseAuth->language_code());
+    result(firebaseAuth->language_code());
     return;
   }
 
@@ -937,7 +935,7 @@ void FirebaseAuthPlugin::Delete(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<void> future = user.Delete();
+  const firebase::Future<void> future = user.Delete();
 
   future.OnCompletion([result](const firebase::Future<void>& completed_future) {
     // We are probably in a different thread right now.
@@ -956,14 +954,14 @@ void FirebaseAuthPlugin::GetIdToken(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<std::string> future; //TODO = user.GetToken(force_refresh);
+  const firebase::Future<std::string> future = user.GetToken(force_refresh);
 
   future.OnCompletion(
       [result](const firebase::Future<std::string>& completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
           PigeonIdTokenResult token_result;
-          std::string_view sv(*completed_future.result());
+          const std::string_view sv(*completed_future.result());
           token_result.set_token(sv);
           result(token_result);
         } else {
@@ -979,7 +977,7 @@ void FirebaseAuthPlugin::LinkWithCredential(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<firebase::auth::AuthResult> future =
+  const firebase::Future<firebase::auth::AuthResult> future =
       user.LinkWithCredential(getCredentialFromArguments(input, app));
 
   future.OnCompletion(
@@ -987,7 +985,7 @@ void FirebaseAuthPlugin::LinkWithCredential(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -1012,7 +1010,7 @@ void FirebaseAuthPlugin::LinkWithProvider(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -1028,7 +1026,7 @@ void FirebaseAuthPlugin::ReauthenticateWithCredential(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<void> future =
+  const firebase::Future<void> future =
       user.Reauthenticate(getCredentialFromArguments(input, app));
 
   future.OnCompletion([result](const firebase::Future<void>& completed_future) {
@@ -1057,7 +1055,7 @@ void FirebaseAuthPlugin::ReauthenticateWithProvider(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -1072,18 +1070,19 @@ void FirebaseAuthPlugin::Reload(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<void> future = user.Reload();
+  const firebase::Future<void> future = user.Reload();
 
-  future.OnCompletion([result, firebaseAuth](
-                          const firebase::Future<void>& completed_future) {
-    // We are probably in a different thread right now.
-    if (completed_future.error() == 0) {
-      PigeonUserDetails user = ParseUserDetails(firebaseAuth->current_user());
-      result(user);
-    } else {
-      result(FirebaseAuthPlugin::ParseError(completed_future));
-    }
-  });
+  future.OnCompletion(
+      [result, firebaseAuth](const firebase::Future<void>& completed_future) {
+        // We are probably in a different thread right now.
+        if (completed_future.error() == 0) {
+          const PigeonUserDetails user =
+              ParseUserDetails(firebaseAuth->current_user());
+          result(user);
+        } else {
+          result(FirebaseAuthPlugin::ParseError(completed_future));
+        }
+      });
 }
 
 void FirebaseAuthPlugin::SendEmailVerification(
@@ -1093,7 +1092,7 @@ void FirebaseAuthPlugin::SendEmailVerification(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<void> future = user.SendEmailVerification();
+  const firebase::Future<void> future = user.SendEmailVerification();
 
   future.OnCompletion([result](const firebase::Future<void>& completed_future) {
     // We are probably in a different thread right now.
@@ -1112,7 +1111,7 @@ void FirebaseAuthPlugin::Unlink(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<firebase::auth::AuthResult> future =
+  const firebase::Future<firebase::auth::AuthResult> future =
       user.Unlink(provider_id.c_str());
 
   future.OnCompletion(
@@ -1120,7 +1119,7 @@ void FirebaseAuthPlugin::Unlink(
                    completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserCredential credential =
+          const PigeonUserCredential credential =
               ParseAuthResult(completed_future.result());
           result(credential);
         } else {
@@ -1136,18 +1135,19 @@ void FirebaseAuthPlugin::UpdateEmail(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<void> future = user.UpdateEmail(new_email.c_str());
+  const firebase::Future<void> future = user.UpdateEmail(new_email.c_str());
 
-  future.OnCompletion([result, firebaseAuth](
-                          const firebase::Future<void>& completed_future) {
-    // We are probably in a different thread right now.
-    if (completed_future.error() == 0) {
-      PigeonUserDetails user = ParseUserDetails(firebaseAuth->current_user());
-      result(user);
-    } else {
-      result(FirebaseAuthPlugin::ParseError(completed_future));
-    }
-  });
+  future.OnCompletion(
+      [result, firebaseAuth](const firebase::Future<void>& completed_future) {
+        // We are probably in a different thread right now.
+        if (completed_future.error() == 0) {
+          const PigeonUserDetails user =
+              ParseUserDetails(firebaseAuth->current_user());
+          result(user);
+        } else {
+          result(FirebaseAuthPlugin::ParseError(completed_future));
+        }
+      });
 }
 
 void FirebaseAuthPlugin::UpdatePassword(
@@ -1157,18 +1157,20 @@ void FirebaseAuthPlugin::UpdatePassword(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<void> future = user.UpdatePassword(new_password.c_str());
+  const firebase::Future<void> future =
+      user.UpdatePassword(new_password.c_str());
 
-  future.OnCompletion([result, firebaseAuth](
-                          const firebase::Future<void>& completed_future) {
-    // We are probably in a different thread right now.
-    if (completed_future.error() == 0) {
-      PigeonUserDetails user = ParseUserDetails(firebaseAuth->current_user());
-      result(user);
-    } else {
-      result(FirebaseAuthPlugin::ParseError(completed_future));
-    }
-  });
+  future.OnCompletion(
+      [result, firebaseAuth](const firebase::Future<void>& completed_future) {
+        // We are probably in a different thread right now.
+        if (completed_future.error() == 0) {
+          const PigeonUserDetails user =
+              ParseUserDetails(firebaseAuth->current_user());
+          result(user);
+        } else {
+          result(FirebaseAuthPlugin::ParseError(completed_future));
+        }
+      });
 }
 
 firebase::auth::PhoneAuthCredential getPhoneCredentialFromArguments(
@@ -1201,7 +1203,7 @@ void FirebaseAuthPlugin::UpdatePhoneNumber(
   firebase::auth::Auth* firebaseAuth = GetAuthFromPigeon(app);
   firebase::auth::User user = firebaseAuth->current_user();
 
-  firebase::Future<firebase::auth::User> future =
+  const firebase::Future<firebase::auth::User> future =
       user.UpdatePhoneNumberCredential(
           getPhoneCredentialFromArguments(input, app));
 
@@ -1209,7 +1211,8 @@ void FirebaseAuthPlugin::UpdatePhoneNumber(
       [result](const firebase::Future<firebase::auth::User>& completed_future) {
         // We are probably in a different thread right now.
         if (completed_future.error() == 0) {
-          PigeonUserDetails user = ParseUserDetails(*completed_future.result());
+          const PigeonUserDetails user =
+              ParseUserDetails(*completed_future.result());
           result(user);
         } else {
           result(FirebaseAuthPlugin::ParseError(completed_future));
@@ -1233,18 +1236,19 @@ void FirebaseAuthPlugin::UpdateProfile(
     userProfile.photo_url = profile.photo_url()->c_str();
   }
 
-  firebase::Future<void> future = user.UpdateUserProfile(userProfile);
+  const firebase::Future<void> future = user.UpdateUserProfile(userProfile);
 
-  future.OnCompletion([result, firebaseAuth](
-                          const firebase::Future<void>& completed_future) {
-    // We are probably in a different thread right now.
-    if (completed_future.error() == 0) {
-      PigeonUserDetails user = ParseUserDetails(firebaseAuth->current_user());
-      result(user);
-    } else {
-      result(FirebaseAuthPlugin::ParseError(completed_future));
-    }
-  });
+  future.OnCompletion(
+      [result, firebaseAuth](const firebase::Future<void>& completed_future) {
+        // We are probably in a different thread right now.
+        if (completed_future.error() == 0) {
+          const PigeonUserDetails user =
+              ParseUserDetails(firebaseAuth->current_user());
+          result(user);
+        } else {
+          result(FirebaseAuthPlugin::ParseError(completed_future));
+        }
+      });
 }
 
 void FirebaseAuthPlugin::VerifyBeforeUpdateEmail(

@@ -4,13 +4,10 @@
 
 #include "shell/platform/desktop/headless_event_loop.h"
 
-#include <utility>
-
 namespace flutter {
 HeadlessEventLoop::HeadlessEventLoop(const std::thread::id main_thread_id,
                                      const TaskExpiredCallback& on_task_expired)
-  : EventLoop(main_thread_id, on_task_expired) {
-}
+    : EventLoop(main_thread_id, on_task_expired) {}
 
 HeadlessEventLoop::~HeadlessEventLoop() = default;
 
@@ -23,4 +20,4 @@ void HeadlessEventLoop::WaitUntil(const TaskTimePoint& time) {
 void HeadlessEventLoop::Wake() {
   task_queue_condition_.notify_one();
 }
-} // namespace flutter
+}  // namespace flutter

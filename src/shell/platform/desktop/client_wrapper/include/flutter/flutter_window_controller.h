@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_WINDOW_CONTROLLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_WINDOW_CONTROLLER_H
 #define FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_WINDOW_CONTROLLER_H_
 
 #include <flutter_desktop.h>
@@ -26,7 +26,7 @@ struct WindowProperties {
   int32_t width;
   // Height in screen coordinates.
   int32_t height;
-  // Whether or not the user is prevented from resizing the window.
+  // Weather or not the user is prevented from resizing the window.
   // Reversed so that the default for a cleared struct is to allow resizing.
   bool prevent_resize;
 };
@@ -49,9 +49,9 @@ class FlutterWindowController : public PluginRegistry {
   //
   // |icu_data_path| is the path to the icudtl.dat file for the version of
   // Flutter you are using.
-  explicit FlutterWindowController(const std::string& icu_data_path);
+  explicit FlutterWindowController(std::string  icu_data_path);
 
-  virtual ~FlutterWindowController();
+  ~FlutterWindowController() override;
 
   // Prevent copying.
   FlutterWindowController(FlutterWindowController const&) = delete;
@@ -106,7 +106,7 @@ class FlutterWindowController : public PluginRegistry {
   // for any window created.
   std::string icu_data_path_;
 
-  // Whether or not FlutterDesktopInit succeeded at creation time.
+  // Weather or not FlutterDesktopInit succeeded at creation time.
   bool init_succeeded_ = false;
 
   // The owned FlutterWindow, if any.

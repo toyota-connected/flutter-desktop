@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_GLFW_HEADLESS_EVENT_LOOP_H_
-#define FLUTTER_SHELL_PLATFORM_GLFW_HEADLESS_EVENT_LOOP_H_
+#ifndef FLUTTER_SHELL_PLATFORM_GLFW_HEADLESS_EVENT_LOOP_H
+#define FLUTTER_SHELL_PLATFORM_GLFW_HEADLESS_EVENT_LOOP_H
 
 #include <condition_variable>
 
@@ -13,7 +13,7 @@ namespace flutter {
 // An event loop implementation that only handles Flutter Engine task
 // scheduling.
 class HeadlessEventLoop : public EventLoop {
-public:
+ public:
   using TaskExpiredCallback = std::function<void(const FlutterTask*)>;
   HeadlessEventLoop(std::thread::id main_thread_id,
                     const TaskExpiredCallback& on_task_expired);
@@ -24,7 +24,7 @@ public:
   HeadlessEventLoop(const HeadlessEventLoop&) = delete;
   HeadlessEventLoop& operator=(const HeadlessEventLoop&) = delete;
 
-private:
+ private:
   // |EventLoop|
   void WaitUntil(const TaskTimePoint& time) override;
 
@@ -33,6 +33,6 @@ private:
 
   std::condition_variable task_queue_condition_;
 };
-} // namespace flutter
+}  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_GLFW_HEADLESS_EVENT_LOOP_H_
+#endif  // FLUTTER_SHELL_PLATFORM_GLFW_HEADLESS_EVENT_LOOP_H

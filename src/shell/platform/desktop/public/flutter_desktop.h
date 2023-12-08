@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_PUBLIC_FLUTTER_DESKTOP_H_
-#define FLUTTER_SHELL_PLATFORM_DESKTOP_PUBLIC_FLUTTER_DESKTOP_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_PUBLIC_FLUTTER_DESKTOP_H
+#define FLUTTER_SHELL_PLATFORM_DESKTOP_PUBLIC_FLUTTER_DESKTOP_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 #include "flutter_export.h"
 #include "flutter_messenger.h"
@@ -67,7 +67,7 @@ typedef struct {
   int32_t width;
   // Height in screen coordinates.
   int32_t height;
-  // Whether or not the user is prevented from resizing the window.
+  // Weather or not the user is prevented from resizing the window.
   // Reversed so that the default for a cleared struct is to allow resizing.
   bool prevent_resize;
 } FlutterDesktopWindowProperties;
@@ -244,4 +244,4 @@ FLUTTER_EXPORT void FlutterDesktopPluginRegistrarEnableInputBlocking(
 }  // extern "C"
 #endif
 
-#endif  // FLUTTER_SHELL_PLATFORM_GLFW_PUBLIC_FLUTTER_GLFW_H_
+#endif  // FLUTTER_SHELL_PLATFORM_GLFW_PUBLIC_FLUTTER_GLFW_H

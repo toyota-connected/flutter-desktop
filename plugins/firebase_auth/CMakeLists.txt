@@ -14,9 +14,6 @@
 # limitations under the License.
 #
 
-include(FindPkgConfig)
-pkg_check_modules(SECRET REQUIRED IMPORTED_TARGET libsecret-1)
-
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 include(FindThreads)
 
@@ -26,33 +23,17 @@ add_library(plugin_firebase_auth STATIC
         messages.g.cc
 )
 
-target_compile_definitions(plugin_firebase_auth PRIVATE INTERNAL_EXPERIMENTAL)
+target_compile_definitions(plugin_firebase_auth PRIVATE
+        INTERNAL_EXPERIMENTAL
+)
 
 target_include_directories(plugin_firebase_auth PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${FIREBASE_CPP_SDK_DIR}/app/src/include
-        ${FIREBASE_CPP_SDK_DIR}/auth/src/include
-)
-
-target_link_directories(plugin_firebase_auth PUBLIC
-        ${FIREBASE_SDK_LIBDIR}/app
-        ${FIREBASE_SDK_LIBDIR}/app/rest
-        ${FIREBASE_SDK_LIBDIR}/auth
-        ${FIREBASE_SDK_LIBDIR}/external/src/curl-build
-        ${FIREBASE_SDK_LIBDIR}/external/src/flatbuffers-build
-        ${FIREBASE_SDK_LIBDIR}/external/src/zlib-build
-        ${FIREBASE_SDK_LIBDIR}/external/src/boringssl
 )
 
 target_link_libraries(plugin_firebase_auth PUBLIC
-        firebase_auth
         plugin_firebase_core
-        firebase_app
-        firebase_rest_lib
-        flatbuffers
-        curl ssl crypto z
-        PkgConfig::SECRET
-        Threads::Threads
+        firebase_sdk
 )
 
 add_sanitizers(plugin_firebase_auth)

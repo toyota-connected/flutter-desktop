@@ -10,9 +10,8 @@
 
 namespace flutter {
 EventLoop::EventLoop(const std::thread::id main_thread_id,
-                     const TaskExpiredCallback& on_task_expired)
-  : main_thread_id_(main_thread_id), on_task_expired_(on_task_expired) {
-}
+                     TaskExpiredCallback  on_task_expired)
+    : main_thread_id_(main_thread_id), on_task_expired_(std::move(on_task_expired)) {}
 
 EventLoop::~EventLoop() = default;
 
@@ -61,13 +60,11 @@ void EventLoop::WaitForEvents(std::chrono::nanoseconds max_wait) {
     {
       std::lock_guard<std::mutex> lock(task_queue_mutex_);
       const TaskTimePoint max_wake_timepoint =
-          max_wait == std::chrono::nanoseconds::max()
-            ? TaskTimePoint::max()
-            : now + max_wait;
-      const TaskTimePoint next_event_timepoint = task_queue_.empty()
-                                                   ? TaskTimePoint::max()
-                                                   : task_queue_.top().
-                                                   fire_time;
+          max_wait == std::chrono::nanoseconds::max() ? TaskTimePoint::max()
+                                                      : now + max_wait;
+      const TaskTimePoint next_event_timepoint =
+          task_queue_.empty() ? TaskTimePoint::max()
+                              : task_queue_.top().fire_time;
       next_wake = std::min(max_wake_timepoint, next_event_timepoint);
     }
     WaitUntil(next_wake);
@@ -102,4 +99,4 @@ void EventLoop::PostTask(const FlutterTask flutter_task,
   }
   Wake();
 }
-} // namespace flutter
+}  // namespace flutter

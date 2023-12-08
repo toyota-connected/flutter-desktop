@@ -14,12 +14,6 @@
 # limitations under the License.
 #
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(UUID REQUIRED IMPORTED_TARGET uuid)
-
-set(CMAKE_THREAD_PREFER_PTHREAD ON)
-include(FindThreads)
-
 add_library(plugin_firebase_storage STATIC
         firebase_storage_plugin.cc
         firebase_storage_plugin_c_api.cc
@@ -27,29 +21,16 @@ add_library(plugin_firebase_storage STATIC
 )
 
 target_compile_definitions(plugin_firebase_storage PRIVATE
-        -DINTERNAL_EXPERIMENTAL=1
+        INTERNAL_EXPERIMENTAL
 )
 
 target_include_directories(plugin_firebase_storage PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${FIREBASE_CPP_SDK_DIR}/app/src/include
-        ${FIREBASE_CPP_SDK_DIR}/storage/src/include
-)
-
-target_link_directories(plugin_firebase_storage PUBLIC
-        ${FIREBASE_SDK_LIBDIR}/app
-        ${FIREBASE_SDK_LIBDIR}/storage
-        ${FIREBASE_SDK_LIBDIR}/external/src/curl-build
-        ${FIREBASE_SDK_LIBDIR}/external/src/flatbuffers-build
-        ${FIREBASE_SDK_LIBDIR}/external/src/zlib-build
-        ${FIREBASE_SDK_LIBDIR}/external/src/boringssl
 )
 
 target_link_libraries(plugin_firebase_storage PUBLIC
         plugin_firebase_core
         firebase_sdk
-        PkgConfig::UUID
-        Threads::Threads
 )
 
 add_sanitizers(plugin_firebase_storage)

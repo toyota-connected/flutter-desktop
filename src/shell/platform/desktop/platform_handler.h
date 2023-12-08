@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_PLATFORM_HANDLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_PLATFORM_HANDLER_H
 #define FLUTTER_SHELL_PLATFORM_DESKTOP_PLATFORM_HANDLER_H_
 
 #include <GLFW/glfw3.h>
@@ -23,7 +23,8 @@ class PlatformHandler {
   // Called when a method is called on |channel_|;
   void HandleMethodCall(
       const flutter::MethodCall<rapidjson::Document>& method_call,
-      const std::unique_ptr<flutter::MethodResult<rapidjson::Document>>& result) const;
+      const std::unique_ptr<flutter::MethodResult<rapidjson::Document>>& result)
+      const;
 
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;

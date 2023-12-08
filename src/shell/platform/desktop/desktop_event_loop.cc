@@ -6,13 +6,10 @@
 
 #include <GLFW/glfw3.h>
 
-#include <utility>
-
 namespace flutter {
 DesktopEventLoop::DesktopEventLoop(std::thread::id main_thread_id,
-                             const TaskExpiredCallback& on_task_expired)
-  : EventLoop(main_thread_id, on_task_expired) {
-}
+                                   const TaskExpiredCallback& on_task_expired)
+    : EventLoop(main_thread_id, on_task_expired) {}
 
 DesktopEventLoop::~DesktopEventLoop() = default;
 
@@ -36,4 +33,4 @@ void DesktopEventLoop::WaitUntil(const TaskTimePoint& time) {
 void DesktopEventLoop::Wake() {
   ::glfwPostEmptyEvent();
 }
-} // namespace flutter
+}  // namespace flutter

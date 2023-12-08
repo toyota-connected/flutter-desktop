@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_SYSTEM_UTILS_H_
-#define FLUTTER_SHELL_PLATFORM_DESKTOP_SYSTEM_UTILS_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_SYSTEM_UTILS_H
+#define FLUTTER_SHELL_PLATFORM_DESKTOP_SYSTEM_UTILS_H
 
 #include <string>
 #include <vector>
@@ -32,4 +32,4 @@ std::vector<FlutterLocale> ConvertToFlutterLocale(
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_SYSTEM_UTILS_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_SYSTEM_UTILS_H

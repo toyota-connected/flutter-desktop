@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_PLUGIN_REGISTRAR_GLFW_H_
-#define FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_PLUGIN_REGISTRAR_GLFW_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_PLUGIN_REGISTRAR_GLFW_H
+#define FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_PLUGIN_REGISTRAR_GLFW_H
 
 #include <flutter_desktop.h>
 
@@ -20,13 +20,14 @@ class PluginRegistrarDesktop : public PluginRegistrar {
  public:
   // Creates a new PluginRegistrar. |core_registrar| and the messenger it
   // provides must remain valid as long as this object exists.
-  explicit PluginRegistrarDesktop(FlutterDesktopPluginRegistrarRef core_registrar)
+  explicit PluginRegistrarDesktop(
+      FlutterDesktopPluginRegistrarRef core_registrar)
       : PluginRegistrar(core_registrar) {
     window_ = std::make_unique<FlutterWindow>(
         FlutterDesktopPluginRegistrarGetWindow(core_registrar));
   }
 
-  virtual ~PluginRegistrarDesktop() {
+  ~PluginRegistrarDesktop() override {
     // Must be the first call.
     ClearPlugins();
     // Explicitly cleared to facilitate destruction order testing.
@@ -55,4 +56,4 @@ class PluginRegistrarDesktop : public PluginRegistrar {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_PLUGIN_REGISTRAR_GLFW_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_PLUGIN_REGISTRAR_GLFW_H

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_ENGINE_H_
-#define FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_ENGINE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_ENGINE_H
+#define FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_ENGINE_H
 
 #include <flutter_desktop.h>
 
@@ -22,7 +22,7 @@ class FlutterEngine final : public PluginRegistry {
  public:
   explicit FlutterEngine();
 
-  virtual ~FlutterEngine();
+  ~FlutterEngine() override;
 
   // Prevent copying.
   FlutterEngine(FlutterEngine const&) = delete;
@@ -58,4 +58,4 @@ class FlutterEngine final : public PluginRegistry {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_ENGINE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DESKTOP_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_ENGINE_H

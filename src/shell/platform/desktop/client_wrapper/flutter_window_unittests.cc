@@ -18,8 +18,8 @@ namespace {
 class TestGlfwApi : public testing::StubFlutterGlfwApi {
  public:
   // |flutter::testing::StubFlutterGlfwApi|
-  void SetSizeLimits(FlutterDesktopSize minimum_size,
-                     FlutterDesktopSize maximum_size) override {
+  void SetSizeLimits(FlutterDesktopSize /* minimum_size */,
+                     FlutterDesktopSize /* maximum_size */) override {
     set_size_limits_called_ = true;
   }
 

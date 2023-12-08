@@ -1,11 +1,12 @@
 // Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+// Copyright 2023, Toyota Connected North America
 
 #include "firestore_codec.h"
 
+#include <cmath>
 #include <map>
-#include <memory>
 #include <optional>
 #include <string>
 
@@ -27,7 +28,7 @@ using firebase::firestore::GeoPoint;
 using flutter::CustomEncodableValue;
 using flutter::EncodableValue;
 
-cloud_firestore_linux::FirestoreCodec::FirestoreCodec() {}
+cloud_firestore_linux::FirestoreCodec::FirestoreCodec() = default;
 
 union DoubleToBytes {
   double value;
@@ -38,7 +39,7 @@ void cloud_firestore_linux::FirestoreCodec::WriteValue(
     const flutter::EncodableValue& value,
     flutter::ByteStreamWriter* stream) const {
   if (std::holds_alternative<CustomEncodableValue>(value)) {
-    const CustomEncodableValue& custom_value =
+    const auto& custom_value =
         std::get<CustomEncodableValue>(value);
     if (custom_value.type() == typeid(Timestamp)) {
       const Timestamp& timestamp = std::any_cast<Timestamp>(custom_value);
@@ -49,10 +50,10 @@ void cloud_firestore_linux::FirestoreCodec::WriteValue(
       const GeoPoint& geopoint = std::any_cast<GeoPoint>(custom_value);
       stream->WriteByte(DATA_TYPE_GEO_POINT);
       stream->WriteAlignment(8);
-      DoubleToBytes converterLatitude;
+      DoubleToBytes converterLatitude = { 0.0 };
       converterLatitude.value = geopoint.latitude();
       stream->WriteBytes(converterLatitude.bytes, 8);
-      DoubleToBytes converterLongitude;
+      DoubleToBytes converterLongitude = { 0.0 };
       converterLongitude.value = geopoint.longitude();
       stream->WriteBytes(converterLongitude.bytes, 8);
     } else if (custom_value.type() == typeid(DocumentReference)) {
@@ -83,9 +84,9 @@ void cloud_firestore_linux::FirestoreCodec::WriteValue(
   }
 }
 
-flutter::EncodableValue
-cloud_firestore_linux::FirestoreCodec::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+flutter::EncodableValue cloud_firestore_linux::FirestoreCodec::ReadValueOfType(
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case DATA_TYPE_DATE_TIME: {
       int64_t value;
@@ -110,7 +111,7 @@ cloud_firestore_linux::FirestoreCodec::ReadValueOfType(
       auto customValue =
           std::get<CustomEncodableValue>(FirestoreCodec::ReadValue(stream));
 
-      Firestore* firestoreRef = std::any_cast<Firestore*>(customValue);
+      auto* firestoreRef = std::any_cast<Firestore*>(customValue);
 
       std::string path =
           std::get<std::string>(FirestoreCodec::ReadValue(stream));

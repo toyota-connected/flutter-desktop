@@ -34,16 +34,17 @@ PlatformHandler::PlatformHandler(flutter::BinaryMessenger* messenger,
       [this](
           const flutter::MethodCall<rapidjson::Document>& call,
           std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
-        HandleMethodCall(call, std::move(result));
+        HandleMethodCall(call, result);
       });
 }
 
 void PlatformHandler::HandleMethodCall(
     const flutter::MethodCall<rapidjson::Document>& method_call,
-    const std::unique_ptr<flutter::MethodResult<rapidjson::Document>>& result) const {
+    const std::unique_ptr<flutter::MethodResult<rapidjson::Document>>& result)
+    const {
   const std::string& method = method_call.method_name();
 
-  if (method.compare(kGetClipboardDataMethod) == 0) {
+  if (method == kGetClipboardDataMethod) {
     if (!window_) {
       result->Error(kNoWindowError,
                     "Clipboard is not available in GLFW headless mode.");
@@ -70,14 +71,15 @@ void PlatformHandler::HandleMethodCall(
     document.AddMember(rapidjson::Value(kTextKey, allocator),
                        rapidjson::Value(clipboardData, allocator), allocator);
     result->Success(document);
-  } else if (method.compare(kSetClipboardDataMethod) == 0) {
+  } else if (method == kSetClipboardDataMethod) {
     if (!window_) {
       result->Error(kNoWindowError,
                     "Clipboard is not available in GLFW headless mode.");
       return;
     }
     const rapidjson::Value& document = *method_call.arguments();
-    const rapidjson::Value::ConstMemberIterator itr = document.FindMember(kTextKey);
+    const rapidjson::Value::ConstMemberIterator itr =
+        document.FindMember(kTextKey);
     if (itr == document.MemberEnd()) {
       result->Error(kUnknownClipboardFormatError,
                     "Missing text to store on clipboard.");
@@ -85,7 +87,7 @@ void PlatformHandler::HandleMethodCall(
     }
     glfwSetClipboardString(window_, itr->value.GetString());
     result->Success();
-  } else if (method.compare(kSystemNavigatorPopMethod) == 0) {
+  } else if (method == kSystemNavigatorPopMethod) {
     exit(EXIT_SUCCESS);
   } else {
     result->NotImplemented();

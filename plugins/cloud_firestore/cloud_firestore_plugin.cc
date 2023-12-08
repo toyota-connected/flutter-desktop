@@ -1,30 +1,29 @@
 // Copyright 2023, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
-
-#pragma comment(lib, \
-                "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
+// Copyright 2023, Toyota Connected North America
 
 #include "cloud_firestore_plugin.h"
 
-// This must be included before many other Windows headers.
 #include <flutter/event_channel.h>
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_desktop.h>
 #include <flutter/standard_method_codec.h>
 
+#include <firebase/app.h>
+#include <uuid/uuid.h>
 #include <condition_variable>
 #include <future>
 #include <memory>
 #include <mutex>
 #include <sstream>
+#include <utility>
 
-#include "cloud_firestore/plugin_version.h"
-#include "firebase/app.h"
 #include "firebase/firestore.h"
 #include "firebase/firestore/filter.h"
 #include "firebase/log.h"
-#include "firebase_core/firebase_core_plugin_c_api.h"
+
+#include "cloud_firestore/plugin_version.h"
 #include "messages.g.h"
 
 using namespace firebase::firestore;
@@ -41,7 +40,7 @@ namespace cloud_firestore_linux {
 static std::string kLibraryName = "flutter-fire-fst";
 // static
 void CloudFirestorePlugin::RegisterWithRegistrar(
-    flutter::PluginRegistrarWindows* registrar) {
+    flutter::PluginRegistrarDesktop* registrar) {
   auto channel =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           registrar->messenger(), "cloud_firestore",
@@ -76,21 +75,19 @@ firebase::firestore::FieldValue CloudFirestorePlugin::ConvertToFieldValue(
     return firebase::firestore::FieldValue::String(
         std::get<std::string>(variant));
   } else if (std::holds_alternative<flutter::EncodableList>(variant)) {
-    const flutter::EncodableList& list =
-        std::get<flutter::EncodableList>(variant);
+    const auto& list = std::get<flutter::EncodableList>(variant);
     std::vector<firebase::firestore::FieldValue> convertedList;
     for (const auto& item : list) {
       convertedList.push_back(ConvertToFieldValue(item));
     }
     return firebase::firestore::FieldValue::Array(convertedList);
   } else if (std::holds_alternative<flutter::EncodableMap>(variant)) {
-    const flutter::EncodableMap& map = std::get<flutter::EncodableMap>(variant);
+    const auto& map = std::get<flutter::EncodableMap>(variant);
     firebase::firestore::MapFieldValue convertedMap =
         ConvertToMapFieldValue(map);
     return firebase::firestore::FieldValue::Map(convertedMap);
   } else if (std::holds_alternative<flutter::CustomEncodableValue>(variant)) {
-    const CustomEncodableValue& custom_value =
-        std::get<CustomEncodableValue>(variant);
+    const auto& custom_value = std::get<CustomEncodableValue>(variant);
 
     using firebase::Timestamp;
 
@@ -138,7 +135,8 @@ std::map<std::string, firebase::firestore::Firestore*>
     cloud_firestore_linux::CloudFirestorePlugin::firestoreInstances_;
 
 std::string RegisterEventChannelWithUUID(
-    std::string prefix, std::string uuid,
+    const std::string& prefix,
+    const std::string& uuid,
     std::unique_ptr<flutter::StreamHandler<flutter::EncodableValue>> handler) {
   std::string channelName = prefix + uuid;
   event_channels_[channelName] =
@@ -156,12 +154,13 @@ std::string RegisterEventChannelWithUUID(
 }
 
 std::string RegisterEventChannel(
-    std::string prefix,
+    const std::string& prefix,
     std::unique_ptr<flutter::StreamHandler<flutter::EncodableValue>> handler) {
-  UUID uuid;
-  UuidCreate(&uuid);
-  char* str;
-  UuidToStringA(&uuid, (RPC_CSTR*)&str);
+  uuid_t uuid;
+  uuid_generate_random(uuid);
+  char str[200];
+  uuid_unparse(uuid, str);
+  std::string result = str;
 
   std::string channelName = prefix + str;
   event_channels_[channelName] =
@@ -174,12 +173,12 @@ std::string RegisterEventChannel(
   event_channels_[channelName]->SetStreamHandler(
       std::move(stream_handlers_[channelName]));
 
-  return str;
+  return std::move(result);
 }
 
-CloudFirestorePlugin::CloudFirestorePlugin() {}
+CloudFirestorePlugin::CloudFirestorePlugin() = default;
 
-CloudFirestorePlugin::~CloudFirestorePlugin() {}
+CloudFirestorePlugin::~CloudFirestorePlugin() = default;
 
 Firestore* GetFirestoreFromPigeon(const FirestorePigeonFirebaseApp& pigeonApp) {
   if (CloudFirestorePlugin::firestoreInstances_.find(pigeonApp.app_name()) !=
@@ -270,7 +269,7 @@ std::string CloudFirestorePlugin::GetErrorCode(
 
 FlutterError CloudFirestorePlugin::ParseError(
     const firebase::FutureBase& completed_future) {
-  const firebase::firestore::Error errorCode =
+  const auto errorCode =
       static_cast<const firebase::firestore::Error>(completed_future.error());
 
   EncodableMap details;
@@ -369,7 +368,7 @@ flutter::EncodableMap ConvertToEncodableMap(
   EncodableMap convertedMap;
   for (const auto& kv : originalMap) {
     EncodableValue key = EncodableValue(kv.first);
-    EncodableValue value = ConvertFieldValueToEncodableValue(
+    const EncodableValue value = ConvertFieldValueToEncodableValue(
         kv.second);             // convert FieldValue to EncodableValue
     convertedMap[key] = value;  // insert into the new map
   }
@@ -384,7 +383,7 @@ PigeonSnapshotMetadata ParseSnapshotMetadata(
 }
 
 PigeonDocumentSnapshot ParseDocumentSnapshot(
-    DocumentSnapshot document,
+    const DocumentSnapshot& document,
     DocumentSnapshot::ServerTimestampBehavior serverTimestampBehavior) {
   flutter::EncodableMap tempMap =
       ConvertToEncodableMap(document.GetData(serverTimestampBehavior));
@@ -401,12 +400,12 @@ PigeonDocumentSnapshot ParseDocumentSnapshot(
 }
 
 flutter::EncodableList ParseDocumentSnapshots(
-    std::vector<DocumentSnapshot> documents,
+    const std::vector<DocumentSnapshot>& documents,
     DocumentSnapshot::ServerTimestampBehavior serverTimestampBehavior) {
   flutter::EncodableList pigeonDocumentSnapshot = flutter::EncodableList();
 
   for (const auto& document : documents) {
-    pigeonDocumentSnapshot.push_back(CustomEncodableValue(
+    pigeonDocumentSnapshot.emplace_back(CustomEncodableValue(
         ParseDocumentSnapshot(document, serverTimestampBehavior)));
   }
   return pigeonDocumentSnapshot;
@@ -438,11 +437,11 @@ PigeonDocumentChange ParseDocumentChange(
 }
 
 flutter::EncodableList ParseDocumentChanges(
-    std::vector<firebase::firestore::DocumentChange> document_changes,
+    const std::vector<firebase::firestore::DocumentChange>& document_changes,
     DocumentSnapshot::ServerTimestampBehavior serverTimestampBehavior) {
   flutter::EncodableList pigeonDocumentChanges = flutter::EncodableList();
   for (const auto& document_change : document_changes) {
-    pigeonDocumentChanges.push_back(CustomEncodableValue(
+    pigeonDocumentChanges.emplace_back(CustomEncodableValue(
         ParseDocumentChange(document_change, serverTimestampBehavior)));
   }
   return pigeonDocumentChanges;
@@ -479,7 +478,7 @@ firebase::firestore::MapFieldValue ConvertToMapFieldValue(
   for (const auto& kv : originalMap) {
     if (std::holds_alternative<std::string>(kv.first)) {
       std::string key = std::get<std::string>(kv.first);
-      firebase::firestore::FieldValue value =
+      const firebase::firestore::FieldValue value =
           CloudFirestorePlugin::ConvertToFieldValue(kv.second);
       convertedMap[key] = value;
     } else {
@@ -504,13 +503,13 @@ firebase::firestore::MapFieldPathValue ConvertToMapFieldPathValue(
       std::vector<std::string> convertedList;
       convertedList.push_back(key);
 
-      firebase::firestore::FieldValue value =
+      const firebase::firestore::FieldValue value =
           CloudFirestorePlugin::ConvertToFieldValue(kv.second);
       convertedMap[FieldPath(convertedList)] = value;
     } else if (std::holds_alternative<CustomEncodableValue>(kv.first)) {
       const FieldPath& fieldPath =
           std::any_cast<FieldPath>(std::get<CustomEncodableValue>(kv.first));
-      firebase::firestore::FieldValue value =
+      const firebase::firestore::FieldValue value =
           CloudFirestorePlugin::ConvertToFieldValue(kv.second);
       convertedMap[fieldPath] = value;
     } else {
@@ -528,12 +527,12 @@ class LoadBundleStreamHandler
  public:
   LoadBundleStreamHandler(Firestore* firestore, std::string bundle) {
     firestore_ = firestore;
-    bundle_ = bundle;
+    bundle_ = std::move(bundle);
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
   OnListenInternal(
-      const flutter::EncodableValue* arguments,
+      const flutter::EncodableValue* /* arguments */,
       std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
       override {
     events_ = std::move(events);
@@ -585,7 +584,7 @@ class LoadBundleStreamHandler
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
-  OnCancelInternal(const flutter::EncodableValue* arguments) override {
+  OnCancelInternal(const flutter::EncodableValue* /* arguments */) override {
     events_->EndOfStream();
     return nullptr;
   }
@@ -597,7 +596,8 @@ class LoadBundleStreamHandler
 };
 
 void CloudFirestorePlugin::LoadBundle(
-    const FirestorePigeonFirebaseApp& app, const std::vector<uint8_t>& bundle,
+    const FirestorePigeonFirebaseApp& app,
+    const std::vector<uint8_t>& bundle,
     std::function<void(ErrorOr<std::string> reply)> result) {
   Firestore* firestore = GetFirestoreFromPigeon(app);
 
@@ -617,11 +617,12 @@ using firebase::firestore::Query;
 using firebase::firestore::QuerySnapshot;
 
 void CloudFirestorePlugin::NamedQueryGet(
-    const FirestorePigeonFirebaseApp& app, const std::string& name,
+    const FirestorePigeonFirebaseApp& app,
+    const std::string& name,
     const PigeonGetOptions& options,
     std::function<void(ErrorOr<PigeonQuerySnapshot> reply)> result) {
   Firestore* firestore = GetFirestoreFromPigeon(app);
-  Future<Query> future = firestore->NamedQuery(name.c_str());
+  const Future<Query> future = firestore->NamedQuery(name);
 
   future.OnCompletion([result, options](const Future<Query>& completed_future) {
     const Query* query = completed_future.result();
@@ -727,8 +728,8 @@ void CloudFirestorePlugin::WaitForPendingWrites(
 }
 
 void CloudFirestorePlugin::SetIndexConfiguration(
-    const FirestorePigeonFirebaseApp& app,
-    const std::string& index_configuration,
+    const FirestorePigeonFirebaseApp& /* app */,
+    const std::string& /* index_configuration */,
     std::function<void(std::optional<FlutterError> reply)> result) {
   // TODO: not available in C++ SDK
   result(FlutterError("Not available in C++ SDK"));
@@ -746,34 +747,36 @@ void CloudFirestorePlugin::SetLoggingEnabled(
 class SnapshotInSyncStreamHandler
     : public flutter::StreamHandler<flutter::EncodableValue> {
  public:
-  SnapshotInSyncStreamHandler(Firestore* firestore) { firestore_ = firestore; }
+  explicit SnapshotInSyncStreamHandler(Firestore* firestore) {
+    firestore_ = firestore;
+  }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
   OnListenInternal(
-      const flutter::EncodableValue* arguments,
+      const flutter::EncodableValue* /* arguments */,
       std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
       override {
     events_ = std::move(events);
     // We do this to bind the event to the main channel
-    auto boundSendEvent =
-        std::bind(&SnapshotInSyncStreamHandler::SendEvent, this);
-    this->SetSendEventFunction(boundSendEvent);
+    this->SetSendEventFunction(
+        [this]() { events_->Success(flutter::EncodableValue()); });
 
     listener_ = firestore_->AddSnapshotsInSyncListener([this]() {
-      if (sendEventFunc_) sendEventFunc_();
+      if (sendEventFunc_)
+        sendEventFunc_();
     });
     return nullptr;
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
-  OnCancelInternal(const flutter::EncodableValue* arguments) override {
+  OnCancelInternal(const flutter::EncodableValue* /* arguments */) override {
     listener_.Remove();
     events_->EndOfStream();
     return nullptr;
   }
 
   void SetSendEventFunction(std::function<void()> func) {
-    sendEventFunc_ = func;
+    sendEventFunc_ = std::move(func);
   }
 
   void SendEvent() { events_->Success(flutter::EncodableValue()); }
@@ -792,10 +795,10 @@ void CloudFirestorePlugin::SnapshotsInSyncSetup(
 
   auto handler = std::make_unique<SnapshotInSyncStreamHandler>(firestore);
 
-  UUID uuid;
-  UuidCreate(&uuid);
-  char* str;
-  UuidToStringA(&uuid, (RPC_CSTR*)&str);
+  uuid_t uuid;
+  uuid_generate_random(uuid);
+  char str[200];
+  uuid_unparse(uuid, str);
   std::string snapshotInSyncId(str);
 
   std::string channelName = RegisterEventChannelWithUUID(
@@ -807,25 +810,27 @@ void CloudFirestorePlugin::SnapshotsInSyncSetup(
 class TransactionStreamHandler
     : public flutter::StreamHandler<flutter::EncodableValue> {
  public:
-  TransactionStreamHandler(Firestore* firestore, long timeout, int maxAttempts,
+  TransactionStreamHandler(Firestore* firestore,
+                           long timeout,
+                           int maxAttempts,
                            std::string transactionId)
       : firestore_(firestore),
         timeout_(timeout),
         maxAttempts_(maxAttempts),
-        transactionId_(transactionId) {}
+        transactionId_(std::move(transactionId)) {}
 
   void ReceiveTransactionResponse(
       PigeonTransactionResult resultType,
       std::vector<PigeonTransactionCommand> commands) {
     std::lock_guard<std::mutex> lock(commands_mutex_);
     resultType_ = resultType;
-    commands_ = commands;
+    commands_ = std::move(commands);
     cv_.notify_one();
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
   OnListenInternal(
-      const flutter::EncodableValue* arguments,
+      const flutter::EncodableValue* /* arguments */,
       std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
       override {
     events_ = std::move(events);
@@ -835,7 +840,7 @@ class TransactionStreamHandler
     firestore_
         ->RunTransaction(
             options,
-            [this](Transaction& transaction, std::string& str) -> Error {
+            [this](Transaction& transaction, std::string& /* str */) -> Error {
               auto noopDeleter = [](Transaction*) {};
               std::shared_ptr<Transaction> ptr(&transaction, noopDeleter);
               CloudFirestorePlugin::transactions_[transactionId_] =
@@ -854,11 +859,12 @@ class TransactionStreamHandler
               }
 
               std::lock_guard<std::mutex> command_lock(commands_mutex_);
-              if (commands_.empty()) return Error::kErrorOk;
+              if (commands_.empty())
+                return Error::kErrorOk;
 
               for (PigeonTransactionCommand& command : commands_) {
                 std::string path = command.path();
-                PigeonTransactionType type = command.type();
+                const PigeonTransactionType type = command.type();
                 if (path.empty() /* or some other invalid condition */) {
                   std::cerr << "Path is invalid: " << path << std::endl;
                   continue;  // Skip this iteration.
@@ -871,6 +877,8 @@ class TransactionStreamHandler
                           << std::endl;  // debug print
 
                 switch (type) {
+                  case PigeonTransactionType::get:
+                    break;
                   case PigeonTransactionType::set:
                     std::cout << "Transaction set" << path
                               << std::endl;  // Debug print.
@@ -909,8 +917,8 @@ class TransactionStreamHandler
               return Error::kErrorOk;
             })
         .OnCompletion([this](const Future<void>& completed_future) {
-          flutter::EncodableMap result;
           if (completed_future.error() == firebase::firestore::kErrorOk) {
+            flutter::EncodableMap result;
             result.insert(std::make_pair(flutter::EncodableValue("complete"),
                                          flutter::EncodableValue(true)));
             events_->Success(result);
@@ -925,7 +933,7 @@ class TransactionStreamHandler
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
-  OnCancelInternal(const flutter::EncodableValue* arguments) override {
+  OnCancelInternal(const flutter::EncodableValue* /* arguments */) override {
     std::unique_lock<std::mutex> lock(mtx_);
     cv_.notify_one();
     events_->EndOfStream();
@@ -946,15 +954,16 @@ class TransactionStreamHandler
 };
 
 void CloudFirestorePlugin::TransactionCreate(
-    const FirestorePigeonFirebaseApp& app, int64_t timeout,
+    const FirestorePigeonFirebaseApp& app,
+    int64_t timeout,
     int64_t max_attempts,
     std::function<void(ErrorOr<std::string> reply)> result) {
   Firestore* firestore = GetFirestoreFromPigeon(app);
 
-  UUID uuid;
-  UuidCreate(&uuid);
-  char* str;
-  UuidToStringA(&uuid, (RPC_CSTR*)&str);
+  uuid_t uuid;
+  uuid_generate_random(uuid);
+  char str[200];
+  uuid_unparse(uuid, str);
   std::string transactionId(str);
 
   auto handler = std::make_unique<TransactionStreamHandler>(
@@ -983,8 +992,9 @@ void CloudFirestorePlugin::TransactionStoreResult(
     const flutter::EncodableList* commands,
     std::function<void(std::optional<FlutterError> reply)> result) {
   if (CloudFirestorePlugin::transaction_handlers_[transaction_id]) {
-    TransactionStreamHandler& handler = *static_cast<TransactionStreamHandler*>(
-        CloudFirestorePlugin::transaction_handlers_[transaction_id].get());
+    TransactionStreamHandler& handler =
+        *dynamic_cast<TransactionStreamHandler*>(
+            CloudFirestorePlugin::transaction_handlers_[transaction_id].get());
     std::vector<PigeonTransactionCommand> commandVector;
     for (const auto& element : *commands) {
       const PigeonTransactionCommand& command =
@@ -1002,18 +1012,20 @@ void CloudFirestorePlugin::TransactionStoreResult(
 }
 
 void CloudFirestorePlugin::TransactionGet(
-    const FirestorePigeonFirebaseApp& app, const std::string& transaction_id,
+    const FirestorePigeonFirebaseApp& app,
+    const std::string& transaction_id,
     const std::string& path,
     std::function<void(ErrorOr<PigeonDocumentSnapshot> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
-  DocumentReference reference = firestore->Document(path);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
+  const DocumentReference reference = firestore->Document(path);
 
-  std::shared_ptr<Transaction> transaction = transactions_[transaction_id];
+  const std::shared_ptr<Transaction> transaction =
+      transactions_[transaction_id];
   Error error_code;
   std::string error_message;
 
   // Call the Get function
-  DocumentSnapshot snapshot =
+  const DocumentSnapshot snapshot =
       transaction->Get(reference, &error_code, &error_message);
 
   if (error_code != Error::kErrorOk) {
@@ -1041,7 +1053,7 @@ std::vector<firebase::firestore::FieldPath> ConvertToFieldPathVector(
     }
 
     // Was already converted by the Codec
-    fieldVector.push_back(firebase::firestore::FieldPath(convertedList));
+    fieldVector.emplace_back(convertedList);
   }
 
   return fieldVector;
@@ -1051,7 +1063,7 @@ void CloudFirestorePlugin::DocumentReferenceSet(
     const FirestorePigeonFirebaseApp& app,
     const DocumentReferenceRequest& request,
     std::function<void(std::optional<FlutterError> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
   DocumentReference document_reference = firestore->Document(request.path());
 
   // Get the data
@@ -1083,12 +1095,12 @@ void CloudFirestorePlugin::DocumentReferenceUpdate(
     const FirestorePigeonFirebaseApp& app,
     const DocumentReferenceRequest& request,
     std::function<void(std::optional<FlutterError> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
   DocumentReference document_reference = firestore->Document(request.path());
 
   // Get the data
-  MapFieldPathValue data = ConvertToMapFieldPathValue(*request.data());
-  Future<void> future = document_reference.Update(data);
+  const MapFieldPathValue data = ConvertToMapFieldPathValue(*request.data());
+  const Future<void> future = document_reference.Update(data);
 
   future.OnCompletion([result](const Future<void>& completed_future) {
     if (completed_future.error() == firebase::firestore::kErrorOk) {
@@ -1104,12 +1116,14 @@ void CloudFirestorePlugin::DocumentReferenceGet(
     const FirestorePigeonFirebaseApp& app,
     const DocumentReferenceRequest& request,
     std::function<void(ErrorOr<PigeonDocumentSnapshot> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
-  DocumentReference document_reference = firestore->Document(request.path());
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
+  const DocumentReference document_reference =
+      firestore->Document(request.path());
 
-  firebase::firestore::Source source = GetSourceFromPigeon(*request.source());
+  const firebase::firestore::Source source =
+      GetSourceFromPigeon(*request.source());
 
-  Future<DocumentSnapshot> future = document_reference.Get(source);
+  const Future<DocumentSnapshot> future = document_reference.Get(source);
 
   future.OnCompletion(
       [result, request](const Future<DocumentSnapshot>& completed_future) {
@@ -1129,10 +1143,10 @@ void CloudFirestorePlugin::DocumentReferenceDelete(
     const FirestorePigeonFirebaseApp& app,
     const DocumentReferenceRequest& request,
     std::function<void(std::optional<FlutterError> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
   DocumentReference document_reference = firestore->Document(request.path());
 
-  Future<void> future = document_reference.Delete();
+  const Future<void> future = document_reference.Delete();
 
   future.OnCompletion([result](const Future<void>& completed_future) {
     if (completed_future.error() == firebase::firestore::kErrorOk) {
@@ -1168,11 +1182,11 @@ using firebase::firestore::Filter;
 firebase::firestore::Filter filterFromJson(const EncodableMap& map) {
   if (map.find(EncodableValue("fieldPath")) != map.end()) {
     // Deserialize a FilterQuery
-    std::string op = std::get<std::string>(map.at(EncodableValue("op")));
+    const std::string op = std::get<std::string>(map.at(EncodableValue("op")));
     const FieldPath& fieldPath = std::any_cast<FieldPath>(
         std::get<CustomEncodableValue>(map.at(EncodableValue("fieldPath"))));
 
-    auto value = map.at(EncodableValue("value"));
+    const auto value = map.at(EncodableValue("value"));
 
     // All the operators from Firebase
     if (op == "==") {
@@ -1215,7 +1229,7 @@ firebase::firestore::Filter filterFromJson(const EncodableMap& map) {
   }
 
   // Deserialize a FilterOperator
-  std::string op = std::get<std::string>(map.at(EncodableValue("op")));
+  const std::string op = std::get<std::string>(map.at(EncodableValue("op")));
   // Assuming the queries are a list of maps
 
   std::vector<EncodableMap> queries;
@@ -1238,10 +1252,11 @@ firebase::firestore::Filter filterFromJson(const EncodableMap& map) {
   throw std::runtime_error("Invalid operator");
 }
 
-firebase::firestore::Query ParseQuery(firebase::firestore::Firestore* firestore,
-                                      const std::string& path,
-                                      bool isCollectionGroup,
-                                      const PigeonQueryParameters& parameters) {
+firebase::firestore::Query ParseQuery(
+    const firebase::firestore::Firestore* firestore,
+    const std::string& path,
+    bool isCollectionGroup,
+    const PigeonQueryParameters& parameters) {
   try {
     firebase::firestore::Query query;
 
@@ -1252,17 +1267,17 @@ firebase::firestore::Query ParseQuery(firebase::firestore::Firestore* firestore,
     }
 
     if (parameters.filters()) {
-      Filter filter = filterFromJson(*parameters.filters());
+      const Filter filter = filterFromJson(*parameters.filters());
       query = query.Where(filter);
     }
 
-    std::vector<std::vector<EncodableValue>> conditions =
+    const std::vector<std::vector<EncodableValue>> conditions =
         ConvertToConditions(*parameters.where());
 
     for (const auto& condition : conditions) {
       const FieldPath& fieldPath = std::any_cast<FieldPath>(
           std::get<CustomEncodableValue>(condition[0]));
-      const std::string& op = std::get<std::string>(condition[1]);
+      const auto& op = std::get<std::string>(condition[1]);
 
       auto value = condition[2];
       if (op == "==") {
@@ -1316,7 +1331,7 @@ firebase::firestore::Query ParseQuery(firebase::firestore::Firestore* firestore,
       return query;
     }
 
-    std::vector<std::vector<EncodableValue>> order_bys =
+    const std::vector<std::vector<EncodableValue>> order_bys =
         ConvertToConditions(*parameters.order_by());
 
     for (const auto& order_by : order_bys) {
@@ -1352,21 +1367,25 @@ firebase::firestore::Query ParseQuery(firebase::firestore::Firestore* firestore,
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;
     // Return a 'null' or 'empty' query based on your C++ Firestore API
-    return firebase::firestore::Query();
+    return {};
   }
 }
 
 void CloudFirestorePlugin::QueryGet(
-    const FirestorePigeonFirebaseApp& app, const std::string& path,
-    bool is_collection_group, const PigeonQueryParameters& parameters,
+    const FirestorePigeonFirebaseApp& app,
+    const std::string& path,
+    bool is_collection_group,
+    const PigeonQueryParameters& parameters,
     const PigeonGetOptions& options,
     std::function<void(ErrorOr<PigeonQuerySnapshot> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
-  Query query = ParseQuery(firestore, path, is_collection_group, parameters);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Query query =
+      ParseQuery(firestore, path, is_collection_group, parameters);
 
-  firebase::firestore::Source source = GetSourceFromPigeon(options.source());
+  const firebase::firestore::Source source =
+      GetSourceFromPigeon(options.source());
 
-  Future<firebase::firestore::QuerySnapshot> future = query.Get(source);
+  const Future<firebase::firestore::QuerySnapshot> future = query.Get(source);
 
   future.OnCompletion(
       [result, options](
@@ -1395,15 +1414,18 @@ firebase::firestore::AggregateSource GetAggregateSourceFromPigeon(
 }
 
 void CloudFirestorePlugin::AggregateQueryCount(
-    const FirestorePigeonFirebaseApp& app, const std::string& path,
-    const PigeonQueryParameters& parameters, const AggregateSource& source,
+    const FirestorePigeonFirebaseApp& app,
+    const std::string& path,
+    const PigeonQueryParameters& parameters,
+    const AggregateSource& source,
     bool is_collection_group,
     std::function<void(ErrorOr<double> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
-  Query query = ParseQuery(firestore, path, is_collection_group, parameters);
-  AggregateQuery aggregate_query = query.Count();
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Query query =
+      ParseQuery(firestore, path, is_collection_group, parameters);
+  const AggregateQuery aggregate_query = query.Count();
 
-  Future<AggregateQuerySnapshot> future =
+  const Future<AggregateQuerySnapshot> future =
       aggregate_query.Get(GetAggregateSourceFromPigeon(source));
 
   future.OnCompletion(
@@ -1419,10 +1441,11 @@ void CloudFirestorePlugin::AggregateQueryCount(
 }
 
 void CloudFirestorePlugin::WriteBatchCommit(
-    const FirestorePigeonFirebaseApp& app, const flutter::EncodableList& writes,
+    const FirestorePigeonFirebaseApp& app,
+    const flutter::EncodableList& writes,
     std::function<void(std::optional<FlutterError> reply)> result) {
   try {
-    Firestore* firestore = GetFirestoreFromPigeon(app);
+    const Firestore* firestore = GetFirestoreFromPigeon(app);
     firebase::firestore::WriteBatch batch = firestore->batch();
 
     for (const auto& write : writes) {
@@ -1430,14 +1453,16 @@ void CloudFirestorePlugin::WriteBatchCommit(
           std::any_cast<PigeonTransactionCommand>(
               std::get<CustomEncodableValue>(write));
 
-      PigeonTransactionType type = transaction.type();
+      const PigeonTransactionType type = transaction.type();
       std::string path = transaction.path();
-      auto data = transaction.data();
+      const auto data = transaction.data();
 
       firebase::firestore::DocumentReference documentReference =
           firestore->Document(path);
 
       switch (type) {
+        case PigeonTransactionType::get:
+          break;
         case PigeonTransactionType::deleteType:
           batch.Delete(documentReference);
           break;
@@ -1483,7 +1508,8 @@ class QuerySnapshotStreamHandler
     : public flutter::StreamHandler<flutter::EncodableValue> {
  public:
   QuerySnapshotStreamHandler(
-      std::unique_ptr<Query> query, bool includeMetadataChanges,
+      std::unique_ptr<Query> query,
+      bool includeMetadataChanges,
       firebase::firestore::DocumentSnapshot::ServerTimestampBehavior
           serverTimestampBehavior) {
     query_ = std::move(query);
@@ -1493,7 +1519,7 @@ class QuerySnapshotStreamHandler
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
   OnListenInternal(
-      const flutter::EncodableValue* arguments,
+      const flutter::EncodableValue* /* arguments */,
       std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
       override {
     MetadataChanges metadataChanges = includeMetadataChanges_
@@ -1548,7 +1574,7 @@ class QuerySnapshotStreamHandler
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
-  OnCancelInternal(const flutter::EncodableValue* arguments) override {
+  OnCancelInternal(const flutter::EncodableValue* /* arguments */) override {
     listener_.Remove();
     events_->EndOfStream();
     return nullptr;
@@ -1564,11 +1590,14 @@ class QuerySnapshotStreamHandler
 };
 
 void CloudFirestorePlugin::QuerySnapshot(
-    const FirestorePigeonFirebaseApp& app, const std::string& path,
-    bool is_collection_group, const PigeonQueryParameters& parameters,
-    const PigeonGetOptions& options, bool include_metadata_changes,
+    const FirestorePigeonFirebaseApp& app,
+    const std::string& path,
+    bool is_collection_group,
+    const PigeonQueryParameters& parameters,
+    const PigeonGetOptions& options,
+    bool include_metadata_changes,
     std::function<void(ErrorOr<std::string> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
   std::unique_ptr<Query> query_ptr = std::make_unique<Query>(
       ParseQuery(firestore, path, is_collection_group, parameters));
 
@@ -1588,7 +1617,8 @@ class DocumentSnapshotStreamHandler
     : public flutter::StreamHandler<flutter::EncodableValue> {
  public:
   DocumentSnapshotStreamHandler(
-      std::unique_ptr<DocumentReference> reference, bool includeMetadataChanges,
+      std::unique_ptr<DocumentReference> reference,
+      bool includeMetadataChanges,
       firebase::firestore::DocumentSnapshot::ServerTimestampBehavior
           serverTimestampBehavior) {
     reference_ = std::move(reference);
@@ -1598,7 +1628,7 @@ class DocumentSnapshotStreamHandler
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
   OnListenInternal(
-      const flutter::EncodableValue* arguments,
+      const flutter::EncodableValue* /* arguments */,
       std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
       override {
     MetadataChanges metadataChanges = includeMetadataChanges_
@@ -1609,10 +1639,10 @@ class DocumentSnapshotStreamHandler
 
     listener_ = reference_->AddSnapshotListener(
         metadataChanges,
-        [this, serverTimestampBehavior = serverTimestampBehavior_,
-         metadataChanges](const firebase::firestore::DocumentSnapshot& snapshot,
-                          firebase::firestore::Error error,
-                          const std::string& errorMessage) mutable {
+        [this, serverTimestampBehavior = serverTimestampBehavior_](
+            const firebase::firestore::DocumentSnapshot& snapshot,
+            firebase::firestore::Error error,
+            const std::string& errorMessage) mutable {
           if (error == firebase::firestore::kErrorOk) {
             events_->Success(
                 ParseDocumentSnapshot(snapshot, serverTimestampBehavior)
@@ -1631,7 +1661,7 @@ class DocumentSnapshotStreamHandler
   }
 
   std::unique_ptr<flutter::StreamHandlerError<flutter::EncodableValue>>
-  OnCancelInternal(const flutter::EncodableValue* arguments) override {
+  OnCancelInternal(const flutter::EncodableValue* /* arguments */) override {
     listener_.Remove();
     events_->EndOfStream();
     return nullptr;
@@ -1648,9 +1678,10 @@ class DocumentSnapshotStreamHandler
 
 void CloudFirestorePlugin::DocumentReferenceSnapshot(
     const FirestorePigeonFirebaseApp& app,
-    const DocumentReferenceRequest& parameters, bool include_metadata_changes,
+    const DocumentReferenceRequest& parameters,
+    bool include_metadata_changes,
     std::function<void(ErrorOr<std::string> reply)> result) {
-  Firestore* firestore = GetFirestoreFromPigeon(app);
+  const Firestore* firestore = GetFirestoreFromPigeon(app);
   std::unique_ptr<DocumentReference> documentReference =
       std::make_unique<DocumentReference>(
           firestore->Document(parameters.path()));

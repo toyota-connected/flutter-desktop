@@ -16,6 +16,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <utility>
 
 namespace firebase_auth_linux {
 using flutter::BasicMessageChannel;
@@ -26,10 +27,12 @@ using flutter::EncodableValue;
 
 // PigeonMultiFactorSession
 
-PigeonMultiFactorSession::PigeonMultiFactorSession(const std::string& id)
-    : id_(id) {}
+PigeonMultiFactorSession::PigeonMultiFactorSession(std::string id)
+    : id_(std::move(id)) {}
 
-const std::string& PigeonMultiFactorSession::id() const { return id_; }
+const std::string& PigeonMultiFactorSession::id() const {
+  return id_;
+}
 
 void PigeonMultiFactorSession::set_id(std::string_view value_arg) {
   id_ = value_arg;
@@ -38,7 +41,7 @@ void PigeonMultiFactorSession::set_id(std::string_view value_arg) {
 EncodableList PigeonMultiFactorSession::ToEncodableList() const {
   EncodableList list;
   list.reserve(1);
-  list.push_back(EncodableValue(id_));
+  list.emplace_back(id_);
   return list;
 }
 
@@ -51,9 +54,10 @@ PigeonMultiFactorSession PigeonMultiFactorSession::FromEncodableList(
 // PigeonPhoneMultiFactorAssertion
 
 PigeonPhoneMultiFactorAssertion::PigeonPhoneMultiFactorAssertion(
-    const std::string& verification_id, const std::string& verification_code)
-    : verification_id_(verification_id),
-      verification_code_(verification_code) {}
+    std::string verification_id,
+    std::string verification_code)
+    : verification_id_(std::move(verification_id)),
+      verification_code_(std::move(verification_code)) {}
 
 const std::string& PigeonPhoneMultiFactorAssertion::verification_id() const {
   return verification_id_;
@@ -76,8 +80,8 @@ void PigeonPhoneMultiFactorAssertion::set_verification_code(
 EncodableList PigeonPhoneMultiFactorAssertion::ToEncodableList() const {
   EncodableList list;
   list.reserve(2);
-  list.push_back(EncodableValue(verification_id_));
-  list.push_back(EncodableValue(verification_code_));
+  list.emplace_back(verification_id_);
+  list.emplace_back(verification_code_);
   return list;
 }
 
@@ -91,20 +95,20 @@ PigeonPhoneMultiFactorAssertion::FromEncodableList(const EncodableList& list) {
 // PigeonMultiFactorInfo
 
 PigeonMultiFactorInfo::PigeonMultiFactorInfo(double enrollment_timestamp,
-                                             const std::string& uid)
-    : enrollment_timestamp_(enrollment_timestamp), uid_(uid) {}
+                                             std::string uid)
+    : enrollment_timestamp_(enrollment_timestamp), uid_(std::move(uid)) {}
 
 PigeonMultiFactorInfo::PigeonMultiFactorInfo(const std::string* display_name,
                                              double enrollment_timestamp,
                                              const std::string* factor_id,
-                                             const std::string& uid,
+                                             std::string uid,
                                              const std::string* phone_number)
     : display_name_(display_name ? std::optional<std::string>(*display_name)
                                  : std::nullopt),
       enrollment_timestamp_(enrollment_timestamp),
       factor_id_(factor_id ? std::optional<std::string>(*factor_id)
                            : std::nullopt),
-      uid_(uid),
+      uid_(std::move(uid)),
       phone_number_(phone_number ? std::optional<std::string>(*phone_number)
                                  : std::nullopt) {}
 
@@ -143,7 +147,9 @@ void PigeonMultiFactorInfo::set_factor_id(std::string_view value_arg) {
   factor_id_ = value_arg;
 }
 
-const std::string& PigeonMultiFactorInfo::uid() const { return uid_; }
+const std::string& PigeonMultiFactorInfo::uid() const {
+  return uid_;
+}
 
 void PigeonMultiFactorInfo::set_uid(std::string_view value_arg) {
   uid_ = value_arg;
@@ -168,9 +174,9 @@ EncodableList PigeonMultiFactorInfo::ToEncodableList() const {
   list.reserve(5);
   list.push_back(display_name_ ? EncodableValue(*display_name_)
                                : EncodableValue());
-  list.push_back(EncodableValue(enrollment_timestamp_));
+  list.emplace_back(enrollment_timestamp_);
   list.push_back(factor_id_ ? EncodableValue(*factor_id_) : EncodableValue());
-  list.push_back(EncodableValue(uid_));
+  list.emplace_back(uid_);
   list.push_back(phone_number_ ? EncodableValue(*phone_number_)
                                : EncodableValue());
   return list;
@@ -197,16 +203,18 @@ PigeonMultiFactorInfo PigeonMultiFactorInfo::FromEncodableList(
 
 // AuthPigeonFirebaseApp
 
-AuthPigeonFirebaseApp::AuthPigeonFirebaseApp(const std::string& app_name)
-    : app_name_(app_name) {}
+AuthPigeonFirebaseApp::AuthPigeonFirebaseApp(std::string app_name)
+    : app_name_(std::move(app_name)) {}
 
-AuthPigeonFirebaseApp::AuthPigeonFirebaseApp(const std::string& app_name,
+AuthPigeonFirebaseApp::AuthPigeonFirebaseApp(std::string app_name,
                                              const std::string* tenant_id)
-    : app_name_(app_name),
+    : app_name_(std::move(app_name)),
       tenant_id_(tenant_id ? std::optional<std::string>(*tenant_id)
                            : std::nullopt) {}
 
-const std::string& AuthPigeonFirebaseApp::app_name() const { return app_name_; }
+const std::string& AuthPigeonFirebaseApp::app_name() const {
+  return app_name_;
+}
 
 void AuthPigeonFirebaseApp::set_app_name(std::string_view value_arg) {
   app_name_ = value_arg;
@@ -228,7 +236,7 @@ void AuthPigeonFirebaseApp::set_tenant_id(std::string_view value_arg) {
 EncodableList AuthPigeonFirebaseApp::ToEncodableList() const {
   EncodableList list;
   list.reserve(2);
-  list.push_back(EncodableValue(app_name_));
+  list.emplace_back(app_name_);
   list.push_back(tenant_id_ ? EncodableValue(*tenant_id_) : EncodableValue());
   return list;
 }
@@ -245,10 +253,11 @@ AuthPigeonFirebaseApp AuthPigeonFirebaseApp::FromEncodableList(
 
 // PigeonActionCodeInfoData
 
-PigeonActionCodeInfoData::PigeonActionCodeInfoData() {}
+PigeonActionCodeInfoData::PigeonActionCodeInfoData() = default;
 
 PigeonActionCodeInfoData::PigeonActionCodeInfoData(
-    const std::string* email, const std::string* previous_email)
+    const std::string* email,
+    const std::string* previous_email)
     : email_(email ? std::optional<std::string>(*email) : std::nullopt),
       previous_email_(previous_email
                           ? std::optional<std::string>(*previous_email)
@@ -307,8 +316,8 @@ PigeonActionCodeInfoData PigeonActionCodeInfoData::FromEncodableList(
 
 PigeonActionCodeInfo::PigeonActionCodeInfo(
     const ActionCodeInfoOperation& operation,
-    const PigeonActionCodeInfoData& data)
-    : operation_(operation), data_(data) {}
+    PigeonActionCodeInfoData data)
+    : operation_(operation), data_(std::move(data)) {}
 
 const ActionCodeInfoOperation& PigeonActionCodeInfo::operation() const {
   return operation_;
@@ -330,8 +339,8 @@ void PigeonActionCodeInfo::set_data(const PigeonActionCodeInfoData& value_arg) {
 EncodableList PigeonActionCodeInfo::ToEncodableList() const {
   EncodableList list;
   list.reserve(2);
-  list.push_back(EncodableValue((int)operation_));
-  list.push_back(EncodableValue(data_.ToEncodableList()));
+  list.emplace_back((int)operation_);
+  list.emplace_back(data_.ToEncodableList());
   return list;
 }
 
@@ -350,8 +359,10 @@ PigeonAdditionalUserInfo::PigeonAdditionalUserInfo(bool is_new_user)
     : is_new_user_(is_new_user) {}
 
 PigeonAdditionalUserInfo::PigeonAdditionalUserInfo(
-    bool is_new_user, const std::string* provider_id,
-    const std::string* username, const std::string* authorization_code,
+    bool is_new_user,
+    const std::string* provider_id,
+    const std::string* username,
+    const std::string* authorization_code,
     const EncodableMap* profile)
     : is_new_user_(is_new_user),
       provider_id_(provider_id ? std::optional<std::string>(*provider_id)
@@ -364,7 +375,9 @@ PigeonAdditionalUserInfo::PigeonAdditionalUserInfo(
       profile_(profile ? std::optional<EncodableMap>(*profile) : std::nullopt) {
 }
 
-bool PigeonAdditionalUserInfo::is_new_user() const { return is_new_user_; }
+bool PigeonAdditionalUserInfo::is_new_user() const {
+  return is_new_user_;
+}
 
 void PigeonAdditionalUserInfo::set_is_new_user(bool value_arg) {
   is_new_user_ = value_arg;
@@ -426,7 +439,7 @@ void PigeonAdditionalUserInfo::set_profile(const EncodableMap& value_arg) {
 EncodableList PigeonAdditionalUserInfo::ToEncodableList() const {
   EncodableList list;
   list.reserve(5);
-  list.push_back(EncodableValue(is_new_user_));
+  list.emplace_back(is_new_user_);
   list.push_back(provider_id_ ? EncodableValue(*provider_id_)
                               : EncodableValue());
   list.push_back(username_ ? EncodableValue(*username_) : EncodableValue());
@@ -461,19 +474,19 @@ PigeonAdditionalUserInfo PigeonAdditionalUserInfo::FromEncodableList(
 
 // PigeonAuthCredential
 
-PigeonAuthCredential::PigeonAuthCredential(const std::string& provider_id,
-                                           const std::string& sign_in_method,
+PigeonAuthCredential::PigeonAuthCredential(std::string provider_id,
+                                           std::string sign_in_method,
                                            int64_t native_id)
-    : provider_id_(provider_id),
-      sign_in_method_(sign_in_method),
+    : provider_id_(std::move(provider_id)),
+      sign_in_method_(std::move(sign_in_method)),
       native_id_(native_id) {}
 
-PigeonAuthCredential::PigeonAuthCredential(const std::string& provider_id,
-                                           const std::string& sign_in_method,
+PigeonAuthCredential::PigeonAuthCredential(std::string provider_id,
+                                           std::string sign_in_method,
                                            int64_t native_id,
                                            const std::string* access_token)
-    : provider_id_(provider_id),
-      sign_in_method_(sign_in_method),
+    : provider_id_(std::move(provider_id)),
+      sign_in_method_(std::move(sign_in_method)),
       native_id_(native_id),
       access_token_(access_token ? std::optional<std::string>(*access_token)
                                  : std::nullopt) {}
@@ -494,7 +507,9 @@ void PigeonAuthCredential::set_sign_in_method(std::string_view value_arg) {
   sign_in_method_ = value_arg;
 }
 
-int64_t PigeonAuthCredential::native_id() const { return native_id_; }
+int64_t PigeonAuthCredential::native_id() const {
+  return native_id_;
+}
 
 void PigeonAuthCredential::set_native_id(int64_t value_arg) {
   native_id_ = value_arg;
@@ -516,9 +531,9 @@ void PigeonAuthCredential::set_access_token(std::string_view value_arg) {
 EncodableList PigeonAuthCredential::ToEncodableList() const {
   EncodableList list;
   list.reserve(4);
-  list.push_back(EncodableValue(provider_id_));
-  list.push_back(EncodableValue(sign_in_method_));
-  list.push_back(EncodableValue(native_id_));
+  list.emplace_back(provider_id_);
+  list.emplace_back(sign_in_method_);
+  list.emplace_back(native_id_);
   list.push_back(access_token_ ? EncodableValue(*access_token_)
                                : EncodableValue());
   return list;
@@ -538,20 +553,26 @@ PigeonAuthCredential PigeonAuthCredential::FromEncodableList(
 
 // PigeonUserInfo
 
-PigeonUserInfo::PigeonUserInfo(const std::string& uid, bool is_anonymous,
+PigeonUserInfo::PigeonUserInfo(std::string uid,
+                               bool is_anonymous,
                                bool is_email_verified)
-    : uid_(uid),
+    : uid_(std::move(uid)),
       is_anonymous_(is_anonymous),
       is_email_verified_(is_email_verified) {}
 
-PigeonUserInfo::PigeonUserInfo(
-    const std::string& uid, const std::string* email,
-    const std::string* display_name, const std::string* photo_url,
-    const std::string* phone_number, bool is_anonymous, bool is_email_verified,
-    const std::string* provider_id, const std::string* tenant_id,
-    const std::string* refresh_token, const int64_t* creation_timestamp,
-    const int64_t* last_sign_in_timestamp)
-    : uid_(uid),
+PigeonUserInfo::PigeonUserInfo(std::string uid,
+                               const std::string* email,
+                               const std::string* display_name,
+                               const std::string* photo_url,
+                               const std::string* phone_number,
+                               bool is_anonymous,
+                               bool is_email_verified,
+                               const std::string* provider_id,
+                               const std::string* tenant_id,
+                               const std::string* refresh_token,
+                               const int64_t* creation_timestamp,
+                               const int64_t* last_sign_in_timestamp)
+    : uid_(std::move(uid)),
       email_(email ? std::optional<std::string>(*email) : std::nullopt),
       display_name_(display_name ? std::optional<std::string>(*display_name)
                                  : std::nullopt),
@@ -575,9 +596,13 @@ PigeonUserInfo::PigeonUserInfo(
               ? std::optional<int64_t>(*last_sign_in_timestamp)
               : std::nullopt) {}
 
-const std::string& PigeonUserInfo::uid() const { return uid_; }
+const std::string& PigeonUserInfo::uid() const {
+  return uid_;
+}
 
-void PigeonUserInfo::set_uid(std::string_view value_arg) { uid_ = value_arg; }
+void PigeonUserInfo::set_uid(std::string_view value_arg) {
+  uid_ = value_arg;
+}
 
 const std::string* PigeonUserInfo::email() const {
   return email_ ? &(*email_) : nullptr;
@@ -630,13 +655,17 @@ void PigeonUserInfo::set_phone_number(std::string_view value_arg) {
   phone_number_ = value_arg;
 }
 
-bool PigeonUserInfo::is_anonymous() const { return is_anonymous_; }
+bool PigeonUserInfo::is_anonymous() const {
+  return is_anonymous_;
+}
 
 void PigeonUserInfo::set_is_anonymous(bool value_arg) {
   is_anonymous_ = value_arg;
 }
 
-bool PigeonUserInfo::is_email_verified() const { return is_email_verified_; }
+bool PigeonUserInfo::is_email_verified() const {
+  return is_email_verified_;
+}
 
 void PigeonUserInfo::set_is_email_verified(bool value_arg) {
   is_email_verified_ = value_arg;
@@ -710,15 +739,15 @@ void PigeonUserInfo::set_last_sign_in_timestamp(int64_t value_arg) {
 EncodableList PigeonUserInfo::ToEncodableList() const {
   EncodableList list;
   list.reserve(12);
-  list.push_back(EncodableValue(uid_));
+  list.emplace_back(uid_);
   list.push_back(email_ ? EncodableValue(*email_) : EncodableValue());
   list.push_back(display_name_ ? EncodableValue(*display_name_)
                                : EncodableValue());
   list.push_back(photo_url_ ? EncodableValue(*photo_url_) : EncodableValue());
   list.push_back(phone_number_ ? EncodableValue(*phone_number_)
                                : EncodableValue());
-  list.push_back(EncodableValue(is_anonymous_));
-  list.push_back(EncodableValue(is_email_verified_));
+  list.emplace_back(is_anonymous_);
+  list.emplace_back(is_email_verified_);
   list.push_back(provider_id_ ? EncodableValue(*provider_id_)
                               : EncodableValue());
   list.push_back(tenant_id_ ? EncodableValue(*tenant_id_) : EncodableValue());
@@ -777,9 +806,10 @@ PigeonUserInfo PigeonUserInfo::FromEncodableList(const EncodableList& list) {
 
 // PigeonUserDetails
 
-PigeonUserDetails::PigeonUserDetails(const PigeonUserInfo& user_info,
-                                     const EncodableList& provider_data)
-    : user_info_(user_info), provider_data_(provider_data) {}
+PigeonUserDetails::PigeonUserDetails(PigeonUserInfo user_info,
+                                     EncodableList provider_data)
+    : user_info_(std::move(user_info)),
+      provider_data_(std::move(provider_data)) {}
 
 const PigeonUserInfo& PigeonUserDetails::user_info() const {
   return user_info_;
@@ -800,8 +830,8 @@ void PigeonUserDetails::set_provider_data(const EncodableList& value_arg) {
 EncodableList PigeonUserDetails::ToEncodableList() const {
   EncodableList list;
   list.reserve(2);
-  list.push_back(EncodableValue(user_info_.ToEncodableList()));
-  list.push_back(EncodableValue(provider_data_));
+  list.emplace_back(user_info_.ToEncodableList());
+  list.emplace_back(provider_data_);
   return list;
 }
 
@@ -815,7 +845,7 @@ PigeonUserDetails PigeonUserDetails::FromEncodableList(
 
 // PigeonUserCredential
 
-PigeonUserCredential::PigeonUserCredential() {}
+PigeonUserCredential::PigeonUserCredential() = default;
 
 PigeonUserCredential::PigeonUserCredential(
     const PigeonUserDetails* user,
@@ -911,19 +941,22 @@ PigeonUserCredential PigeonUserCredential::FromEncodableList(
 
 // PigeonActionCodeSettings
 
-PigeonActionCodeSettings::PigeonActionCodeSettings(const std::string& url,
+PigeonActionCodeSettings::PigeonActionCodeSettings(std::string url,
                                                    bool handle_code_in_app,
                                                    bool android_install_app)
-    : url_(url),
+    : url_(std::move(url)),
       handle_code_in_app_(handle_code_in_app),
       android_install_app_(android_install_app) {}
 
 PigeonActionCodeSettings::PigeonActionCodeSettings(
-    const std::string& url, const std::string* dynamic_link_domain,
-    bool handle_code_in_app, const std::string* i_o_s_bundle_id,
-    const std::string* android_package_name, bool android_install_app,
+    std::string url,
+    const std::string* dynamic_link_domain,
+    bool handle_code_in_app,
+    const std::string* i_o_s_bundle_id,
+    const std::string* android_package_name,
+    bool android_install_app,
     const std::string* android_minimum_version)
-    : url_(url),
+    : url_(std::move(url)),
       dynamic_link_domain_(
           dynamic_link_domain ? std::optional<std::string>(*dynamic_link_domain)
                               : std::nullopt),
@@ -940,7 +973,9 @@ PigeonActionCodeSettings::PigeonActionCodeSettings(
               ? std::optional<std::string>(*android_minimum_version)
               : std::nullopt) {}
 
-const std::string& PigeonActionCodeSettings::url() const { return url_; }
+const std::string& PigeonActionCodeSettings::url() const {
+  return url_;
+}
 
 void PigeonActionCodeSettings::set_url(std::string_view value_arg) {
   url_ = value_arg;
@@ -1024,15 +1059,15 @@ void PigeonActionCodeSettings::set_android_minimum_version(
 EncodableList PigeonActionCodeSettings::ToEncodableList() const {
   EncodableList list;
   list.reserve(7);
-  list.push_back(EncodableValue(url_));
+  list.emplace_back(url_);
   list.push_back(dynamic_link_domain_ ? EncodableValue(*dynamic_link_domain_)
                                       : EncodableValue());
-  list.push_back(EncodableValue(handle_code_in_app_));
+  list.emplace_back(handle_code_in_app_);
   list.push_back(i_o_s_bundle_id_ ? EncodableValue(*i_o_s_bundle_id_)
                                   : EncodableValue());
   list.push_back(android_package_name_ ? EncodableValue(*android_package_name_)
                                        : EncodableValue());
-  list.push_back(EncodableValue(android_install_app_));
+  list.emplace_back(android_install_app_);
   list.push_back(android_minimum_version_
                      ? EncodableValue(*android_minimum_version_)
                      : EncodableValue());
@@ -1076,8 +1111,10 @@ PigeonFirebaseAuthSettings::PigeonFirebaseAuthSettings(
 
 PigeonFirebaseAuthSettings::PigeonFirebaseAuthSettings(
     bool app_verification_disabled_for_testing,
-    const std::string* user_access_group, const std::string* phone_number,
-    const std::string* sms_code, const bool* force_recaptcha_flow)
+    const std::string* user_access_group,
+    const std::string* phone_number,
+    const std::string* sms_code,
+    const bool* force_recaptcha_flow)
     : app_verification_disabled_for_testing_(
           app_verification_disabled_for_testing),
       user_access_group_(user_access_group
@@ -1159,7 +1196,7 @@ void PigeonFirebaseAuthSettings::set_force_recaptcha_flow(bool value_arg) {
 EncodableList PigeonFirebaseAuthSettings::ToEncodableList() const {
   EncodableList list;
   list.reserve(5);
-  list.push_back(EncodableValue(app_verification_disabled_for_testing_));
+  list.emplace_back(app_verification_disabled_for_testing_);
   list.push_back(user_access_group_ ? EncodableValue(*user_access_group_)
                                     : EncodableValue());
   list.push_back(phone_number_ ? EncodableValue(*phone_number_)
@@ -1196,13 +1233,14 @@ PigeonFirebaseAuthSettings PigeonFirebaseAuthSettings::FromEncodableList(
 
 // PigeonSignInProvider
 
-PigeonSignInProvider::PigeonSignInProvider(const std::string& provider_id)
-    : provider_id_(provider_id) {}
+PigeonSignInProvider::PigeonSignInProvider(std::string provider_id)
+    : provider_id_(std::move(provider_id)) {}
 
 PigeonSignInProvider::PigeonSignInProvider(
-    const std::string& provider_id, const EncodableList* scopes,
+    std::string provider_id,
+    const EncodableList* scopes,
     const EncodableMap* custom_parameters)
-    : provider_id_(provider_id),
+    : provider_id_(std::move(provider_id)),
       scopes_(scopes ? std::optional<EncodableList>(*scopes) : std::nullopt),
       custom_parameters_(custom_parameters
                              ? std::optional<EncodableMap>(*custom_parameters)
@@ -1246,7 +1284,7 @@ void PigeonSignInProvider::set_custom_parameters(
 EncodableList PigeonSignInProvider::ToEncodableList() const {
   EncodableList list;
   list.reserve(3);
-  list.push_back(EncodableValue(provider_id_));
+  list.emplace_back(provider_id_);
   list.push_back(scopes_ ? EncodableValue(*scopes_) : EncodableValue());
   list.push_back(custom_parameters_ ? EncodableValue(*custom_parameters_)
                                     : EncodableValue());
@@ -1274,7 +1312,8 @@ PigeonVerifyPhoneNumberRequest::PigeonVerifyPhoneNumberRequest(int64_t timeout)
     : timeout_(timeout) {}
 
 PigeonVerifyPhoneNumberRequest::PigeonVerifyPhoneNumberRequest(
-    const std::string* phone_number, int64_t timeout,
+    const std::string* phone_number,
+    int64_t timeout,
     const int64_t* force_resending_token,
     const std::string* auto_retrieved_sms_code_for_testing,
     const std::string* multi_factor_info_id,
@@ -1312,7 +1351,9 @@ void PigeonVerifyPhoneNumberRequest::set_phone_number(
   phone_number_ = value_arg;
 }
 
-int64_t PigeonVerifyPhoneNumberRequest::timeout() const { return timeout_; }
+int64_t PigeonVerifyPhoneNumberRequest::timeout() const {
+  return timeout_;
+}
 
 void PigeonVerifyPhoneNumberRequest::set_timeout(int64_t value_arg) {
   timeout_ = value_arg;
@@ -1388,7 +1429,7 @@ EncodableList PigeonVerifyPhoneNumberRequest::ToEncodableList() const {
   list.reserve(6);
   list.push_back(phone_number_ ? EncodableValue(*phone_number_)
                                : EncodableValue());
-  list.push_back(EncodableValue(timeout_));
+  list.emplace_back(timeout_);
   list.push_back(force_resending_token_
                      ? EncodableValue(*force_resending_token_)
                      : EncodableValue());
@@ -1435,12 +1476,15 @@ PigeonVerifyPhoneNumberRequest::FromEncodableList(const EncodableList& list) {
 
 // PigeonIdTokenResult
 
-PigeonIdTokenResult::PigeonIdTokenResult() {}
+PigeonIdTokenResult::PigeonIdTokenResult() = default;
 
 PigeonIdTokenResult::PigeonIdTokenResult(
-    const std::string* token, const int64_t* expiration_timestamp,
-    const int64_t* auth_timestamp, const int64_t* issued_at_timestamp,
-    const std::string* sign_in_provider, const EncodableMap* claims,
+    const std::string* token,
+    const int64_t* expiration_timestamp,
+    const int64_t* auth_timestamp,
+    const int64_t* issued_at_timestamp,
+    const std::string* sign_in_provider,
+    const EncodableMap* claims,
     const std::string* sign_in_second_factor)
     : token_(token ? std::optional<std::string>(*token) : std::nullopt),
       expiration_timestamp_(expiration_timestamp
@@ -1659,7 +1703,9 @@ void PigeonUserProfile::set_display_name_changed(bool value_arg) {
   display_name_changed_ = value_arg;
 }
 
-bool PigeonUserProfile::photo_url_changed() const { return photo_url_changed_; }
+bool PigeonUserProfile::photo_url_changed() const {
+  return photo_url_changed_;
+}
 
 void PigeonUserProfile::set_photo_url_changed(bool value_arg) {
   photo_url_changed_ = value_arg;
@@ -1671,8 +1717,8 @@ EncodableList PigeonUserProfile::ToEncodableList() const {
   list.push_back(display_name_ ? EncodableValue(*display_name_)
                                : EncodableValue());
   list.push_back(photo_url_ ? EncodableValue(*photo_url_) : EncodableValue());
-  list.push_back(EncodableValue(display_name_changed_));
-  list.push_back(EncodableValue(photo_url_changed_));
+  list.emplace_back(display_name_changed_);
+  list.emplace_back(photo_url_changed_);
   return list;
 }
 
@@ -1692,13 +1738,15 @@ PigeonUserProfile PigeonUserProfile::FromEncodableList(
 
 // PigeonTotpSecret
 
-PigeonTotpSecret::PigeonTotpSecret(const std::string& secret_key)
-    : secret_key_(secret_key) {}
+PigeonTotpSecret::PigeonTotpSecret(std::string secret_key)
+    : secret_key_(std::move(secret_key)) {}
 
 PigeonTotpSecret::PigeonTotpSecret(
-    const int64_t* code_interval_seconds, const int64_t* code_length,
+    const int64_t* code_interval_seconds,
+    const int64_t* code_length,
     const int64_t* enrollment_completion_deadline,
-    const std::string* hashing_algorithm, const std::string& secret_key)
+    const std::string* hashing_algorithm,
+    std::string secret_key)
     : code_interval_seconds_(
           code_interval_seconds ? std::optional<int64_t>(*code_interval_seconds)
                                 : std::nullopt),
@@ -1711,7 +1759,7 @@ PigeonTotpSecret::PigeonTotpSecret(
       hashing_algorithm_(hashing_algorithm
                              ? std::optional<std::string>(*hashing_algorithm)
                              : std::nullopt),
-      secret_key_(secret_key) {}
+      secret_key_(std::move(secret_key)) {}
 
 const int64_t* PigeonTotpSecret::code_interval_seconds() const {
   return code_interval_seconds_ ? &(*code_interval_seconds_) : nullptr;
@@ -1767,7 +1815,9 @@ void PigeonTotpSecret::set_hashing_algorithm(std::string_view value_arg) {
   hashing_algorithm_ = value_arg;
 }
 
-const std::string& PigeonTotpSecret::secret_key() const { return secret_key_; }
+const std::string& PigeonTotpSecret::secret_key() const {
+  return secret_key_;
+}
 
 void PigeonTotpSecret::set_secret_key(std::string_view value_arg) {
   secret_key_ = value_arg;
@@ -1786,7 +1836,7 @@ EncodableList PigeonTotpSecret::ToEncodableList() const {
                      : EncodableValue());
   list.push_back(hashing_algorithm_ ? EncodableValue(*hashing_algorithm_)
                                     : EncodableValue());
-  list.push_back(EncodableValue(secret_key_));
+  list.emplace_back(secret_key_);
   return list;
 }
 
@@ -1815,10 +1865,12 @@ PigeonTotpSecret PigeonTotpSecret::FromEncodableList(
   return decoded;
 }
 
-FirebaseAuthHostApiCodecSerializer::FirebaseAuthHostApiCodecSerializer() {}
+FirebaseAuthHostApiCodecSerializer::FirebaseAuthHostApiCodecSerializer() =
+    default;
 
 EncodableValue FirebaseAuthHostApiCodecSerializer::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 128:
       return CustomEncodableValue(AuthPigeonFirebaseApp::FromEncodableList(
@@ -1882,7 +1934,8 @@ EncodableValue FirebaseAuthHostApiCodecSerializer::ReadValueOfType(
 }
 
 void FirebaseAuthHostApiCodecSerializer::WriteValue(
-    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+    const EncodableValue& value,
+    flutter::ByteStreamWriter* stream) const {
   if (const CustomEncodableValue* custom_value =
           std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(AuthPigeonFirebaseApp)) {
@@ -2042,7 +2095,7 @@ const flutter::StandardMessageCodec& FirebaseAuthHostApi::GetCodec() {
 void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                 FirebaseAuthHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.registerIdTokenListener",
@@ -2067,8 +2120,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2080,7 +2132,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.registerAuthStateListener",
@@ -2105,8 +2157,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2118,7 +2169,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.useEmulator",
@@ -2155,7 +2206,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                    return;
                                  }
                                  EncodableList wrapped;
-                                 wrapped.push_back(EncodableValue());
+                                 wrapped.emplace_back();
                                  reply(EncodableValue(std::move(wrapped)));
                                });
             } catch (const std::exception& exception) {
@@ -2167,7 +2218,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.applyActionCode",
@@ -2199,7 +2250,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2211,7 +2262,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.checkActionCode",
@@ -2243,7 +2294,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2256,7 +2307,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.confirmPasswordReset",
@@ -2295,7 +2346,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2307,7 +2358,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.createUserWithEmailAndPassword",
@@ -2347,7 +2398,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2360,7 +2411,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signInAnonymously",
@@ -2385,7 +2436,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2398,7 +2449,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signInWithCredential",
@@ -2431,7 +2482,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2444,7 +2495,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signInWithCustomToken",
@@ -2477,7 +2528,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2490,7 +2541,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signInWithEmailAndPassword",
@@ -2530,7 +2581,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2543,7 +2594,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signInWithEmailLink",
@@ -2583,7 +2634,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2596,7 +2647,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signInWithProvider",
@@ -2631,7 +2682,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -2644,7 +2695,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.signOut",
@@ -2669,7 +2720,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                return;
                              }
                              EncodableList wrapped;
-                             wrapped.push_back(EncodableValue());
+                             wrapped.emplace_back();
                              reply(EncodableValue(std::move(wrapped)));
                            });
             } catch (const std::exception& exception) {
@@ -2681,7 +2732,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.fetchSignInMethodsForEmail",
@@ -2713,8 +2764,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2726,7 +2776,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.sendPasswordResetEmail",
@@ -2764,7 +2814,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2776,7 +2826,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.sendSignInLinkToEmail",
@@ -2818,7 +2868,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2830,7 +2880,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.setLanguageCode",
@@ -2851,17 +2901,17 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
               const auto& encodable_language_code_arg = args.at(1);
               const auto* language_code_arg =
                   std::get_if<std::string>(&encodable_language_code_arg);
-              api->SetLanguageCode(app_arg, language_code_arg,
-                                   [reply](ErrorOr<std::string>&& output) {
-                                     if (output.has_error()) {
-                                       reply(WrapError(output.error()));
-                                       return;
-                                     }
-                                     EncodableList wrapped;
-                                     wrapped.push_back(EncodableValue(
-                                         std::move(output).TakeValue()));
-                                     reply(EncodableValue(std::move(wrapped)));
-                                   });
+              api->SetLanguageCode(
+                  app_arg, language_code_arg,
+                  [reply](ErrorOr<std::string>&& output) {
+                    if (output.has_error()) {
+                      reply(WrapError(output.error()));
+                      return;
+                    }
+                    EncodableList wrapped;
+                    wrapped.emplace_back(std::move(output).TakeValue());
+                    reply(EncodableValue(std::move(wrapped)));
+                  });
             } catch (const std::exception& exception) {
               reply(WrapError(exception.what()));
             }
@@ -2871,7 +2921,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.setSettings",
@@ -2904,7 +2954,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                    return;
                                  }
                                  EncodableList wrapped;
-                                 wrapped.push_back(EncodableValue());
+                                 wrapped.emplace_back();
                                  reply(EncodableValue(std::move(wrapped)));
                                });
             } catch (const std::exception& exception) {
@@ -2916,7 +2966,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.verifyPasswordResetCode",
@@ -2947,8 +2997,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -2960,7 +3009,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.verifyPhoneNumber",
@@ -2993,8 +3042,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -3006,7 +3054,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthHostApi.revokeTokenWithAuthorizationCode",
@@ -3039,7 +3087,7 @@ void FirebaseAuthHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -3065,10 +3113,11 @@ EncodableValue FirebaseAuthHostApi::WrapError(const FlutterError& error) {
 }
 
 FirebaseAuthUserHostApiCodecSerializer::
-    FirebaseAuthUserHostApiCodecSerializer() {}
+FirebaseAuthUserHostApiCodecSerializer() = default;
 
 EncodableValue FirebaseAuthUserHostApiCodecSerializer::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 128:
       return CustomEncodableValue(AuthPigeonFirebaseApp::FromEncodableList(
@@ -3132,7 +3181,8 @@ EncodableValue FirebaseAuthUserHostApiCodecSerializer::ReadValueOfType(
 }
 
 void FirebaseAuthUserHostApiCodecSerializer::WriteValue(
-    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+    const EncodableValue& value,
+    flutter::ByteStreamWriter* stream) const {
   if (const CustomEncodableValue* custom_value =
           std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(AuthPigeonFirebaseApp)) {
@@ -3292,7 +3342,7 @@ const flutter::StandardMessageCodec& FirebaseAuthUserHostApi::GetCodec() {
 void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                     FirebaseAuthUserHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.delete",
@@ -3317,7 +3367,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                               return;
                             }
                             EncodableList wrapped;
-                            wrapped.push_back(EncodableValue());
+                            wrapped.emplace_back();
                             reply(EncodableValue(std::move(wrapped)));
                           });
             } catch (const std::exception& exception) {
@@ -3329,7 +3379,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.getIdToken",
@@ -3361,7 +3411,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                   return;
                                 }
                                 EncodableList wrapped;
-                                wrapped.push_back(CustomEncodableValue(
+                                wrapped.emplace_back(CustomEncodableValue(
                                     std::move(output).TakeValue()));
                                 reply(EncodableValue(std::move(wrapped)));
                               });
@@ -3374,7 +3424,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.linkWithCredential",
@@ -3407,7 +3457,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -3420,7 +3470,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.linkWithProvider",
@@ -3455,7 +3505,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -3468,7 +3518,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.reauthenticateWithCredential",
@@ -3501,7 +3551,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -3514,7 +3564,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.reauthenticateWithProvider",
@@ -3549,7 +3599,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -3562,7 +3612,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.reload",
@@ -3587,7 +3637,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -3600,7 +3650,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.sendEmailVerification",
@@ -3631,7 +3681,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -3643,7 +3693,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.unlink",
@@ -3675,7 +3725,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                               return;
                             }
                             EncodableList wrapped;
-                            wrapped.push_back(CustomEncodableValue(
+                            wrapped.emplace_back(CustomEncodableValue(
                                 std::move(output).TakeValue()));
                             reply(EncodableValue(std::move(wrapped)));
                           });
@@ -3688,7 +3738,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.updateEmail",
@@ -3720,7 +3770,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                    return;
                                  }
                                  EncodableList wrapped;
-                                 wrapped.push_back(CustomEncodableValue(
+                                 wrapped.emplace_back(CustomEncodableValue(
                                      std::move(output).TakeValue()));
                                  reply(EncodableValue(std::move(wrapped)));
                                });
@@ -3733,7 +3783,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.updatePassword",
@@ -3765,7 +3815,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                       return;
                                     }
                                     EncodableList wrapped;
-                                    wrapped.push_back(CustomEncodableValue(
+                                    wrapped.emplace_back(CustomEncodableValue(
                                         std::move(output).TakeValue()));
                                     reply(EncodableValue(std::move(wrapped)));
                                   });
@@ -3778,7 +3828,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.updatePhoneNumber",
@@ -3811,7 +3861,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -3824,7 +3874,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.updateProfile",
@@ -3856,7 +3906,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                      return;
                                    }
                                    EncodableList wrapped;
-                                   wrapped.push_back(CustomEncodableValue(
+                                   wrapped.emplace_back(CustomEncodableValue(
                                        std::move(output).TakeValue()));
                                    reply(EncodableValue(std::move(wrapped)));
                                  });
@@ -3869,7 +3919,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "FirebaseAuthUserHostApi.verifyBeforeUpdateEmail",
@@ -3907,7 +3957,7 @@ void FirebaseAuthUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(EncodableValue());
+                    wrapped.emplace_back();
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -3933,11 +3983,12 @@ EncodableValue FirebaseAuthUserHostApi::WrapError(const FlutterError& error) {
                                       error.details()});
 }
 
-MultiFactorUserHostApiCodecSerializer::MultiFactorUserHostApiCodecSerializer() {
-}
+MultiFactorUserHostApiCodecSerializer::MultiFactorUserHostApiCodecSerializer() =
+    default;
 
 EncodableValue MultiFactorUserHostApiCodecSerializer::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 128:
       return CustomEncodableValue(AuthPigeonFirebaseApp::FromEncodableList(
@@ -3958,7 +4009,8 @@ EncodableValue MultiFactorUserHostApiCodecSerializer::ReadValueOfType(
 }
 
 void MultiFactorUserHostApiCodecSerializer::WriteValue(
-    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+    const EncodableValue& value,
+    flutter::ByteStreamWriter* stream) const {
   if (const CustomEncodableValue* custom_value =
           std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(AuthPigeonFirebaseApp)) {
@@ -4008,7 +4060,7 @@ const flutter::StandardMessageCodec& MultiFactorUserHostApi::GetCodec() {
 void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                    MultiFactorUserHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorUserHostApi.enrollPhone",
@@ -4044,7 +4096,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                    return;
                                  }
                                  EncodableList wrapped;
-                                 wrapped.push_back(EncodableValue());
+                                 wrapped.emplace_back();
                                  reply(EncodableValue(std::move(wrapped)));
                                });
             } catch (const std::exception& exception) {
@@ -4056,7 +4108,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorUserHostApi.enrollTotp",
@@ -4091,7 +4143,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                   return;
                                 }
                                 EncodableList wrapped;
-                                wrapped.push_back(EncodableValue());
+                                wrapped.emplace_back();
                                 reply(EncodableValue(std::move(wrapped)));
                               });
             } catch (const std::exception& exception) {
@@ -4103,7 +4155,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorUserHostApi.getSession",
@@ -4128,7 +4180,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -4141,7 +4193,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorUserHostApi.unenroll",
@@ -4173,7 +4225,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                 return;
                               }
                               EncodableList wrapped;
-                              wrapped.push_back(EncodableValue());
+                              wrapped.emplace_back();
                               reply(EncodableValue(std::move(wrapped)));
                             });
             } catch (const std::exception& exception) {
@@ -4185,7 +4237,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorUserHostApi.getEnrolledFactors",
@@ -4210,8 +4262,7 @@ void MultiFactorUserHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -4238,10 +4289,11 @@ EncodableValue MultiFactorUserHostApi::WrapError(const FlutterError& error) {
 }
 
 MultiFactoResolverHostApiCodecSerializer::
-    MultiFactoResolverHostApiCodecSerializer() {}
+MultiFactoResolverHostApiCodecSerializer() = default;
 
 EncodableValue MultiFactoResolverHostApiCodecSerializer::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 128:
       return CustomEncodableValue(PigeonAdditionalUserInfo::FromEncodableList(
@@ -4268,7 +4320,8 @@ EncodableValue MultiFactoResolverHostApiCodecSerializer::ReadValueOfType(
 }
 
 void MultiFactoResolverHostApiCodecSerializer::WriteValue(
-    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+    const EncodableValue& value,
+    flutter::ByteStreamWriter* stream) const {
   if (const CustomEncodableValue* custom_value =
           std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(PigeonAdditionalUserInfo)) {
@@ -4334,7 +4387,7 @@ void MultiFactoResolverHostApi::SetUp(
     flutter::BinaryMessenger* binary_messenger,
     MultiFactoResolverHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactoResolverHostApi.resolveSignIn",
@@ -4367,7 +4420,7 @@ void MultiFactoResolverHostApi::SetUp(
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -4394,11 +4447,12 @@ EncodableValue MultiFactoResolverHostApi::WrapError(const FlutterError& error) {
                                       error.details()});
 }
 
-MultiFactorTotpHostApiCodecSerializer::MultiFactorTotpHostApiCodecSerializer() {
-}
+MultiFactorTotpHostApiCodecSerializer::MultiFactorTotpHostApiCodecSerializer() =
+    default;
 
 EncodableValue MultiFactorTotpHostApiCodecSerializer::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 128:
       return CustomEncodableValue(PigeonTotpSecret::FromEncodableList(
@@ -4409,7 +4463,8 @@ EncodableValue MultiFactorTotpHostApiCodecSerializer::ReadValueOfType(
 }
 
 void MultiFactorTotpHostApiCodecSerializer::WriteValue(
-    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+    const EncodableValue& value,
+    flutter::ByteStreamWriter* stream) const {
   if (const CustomEncodableValue* custom_value =
           std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(PigeonTotpSecret)) {
@@ -4435,7 +4490,7 @@ const flutter::StandardMessageCodec& MultiFactorTotpHostApi::GetCodec() {
 void MultiFactorTotpHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                                    MultiFactorTotpHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorTotpHostApi.generateSecret",
@@ -4460,7 +4515,7 @@ void MultiFactorTotpHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
+                    wrapped.emplace_back(
                         CustomEncodableValue(std::move(output).TakeValue()));
                     reply(EncodableValue(std::move(wrapped)));
                   });
@@ -4473,7 +4528,7 @@ void MultiFactorTotpHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorTotpHostApi.getAssertionForEnrollment",
@@ -4506,8 +4561,7 @@ void MultiFactorTotpHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -4519,7 +4573,7 @@ void MultiFactorTotpHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorTotpHostApi.getAssertionForSignIn",
@@ -4552,8 +4606,7 @@ void MultiFactorTotpHostApi::SetUp(flutter::BinaryMessenger* binary_messenger,
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -4591,7 +4644,7 @@ void MultiFactorTotpSecretHostApi::SetUp(
     flutter::BinaryMessenger* binary_messenger,
     MultiFactorTotpSecretHostApi* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorTotpSecretHostApi.generateQrCodeUrl",
@@ -4623,8 +4676,7 @@ void MultiFactorTotpSecretHostApi::SetUp(
                       return;
                     }
                     EncodableList wrapped;
-                    wrapped.push_back(
-                        EncodableValue(std::move(output).TakeValue()));
+                    wrapped.emplace_back(std::move(output).TakeValue());
                     reply(EncodableValue(std::move(wrapped)));
                   });
             } catch (const std::exception& exception) {
@@ -4636,7 +4688,7 @@ void MultiFactorTotpSecretHostApi::SetUp(
     }
   }
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "MultiFactorTotpSecretHostApi.openInOtpApp",
@@ -4668,7 +4720,7 @@ void MultiFactorTotpSecretHostApi::SetUp(
                                     return;
                                   }
                                   EncodableList wrapped;
-                                  wrapped.push_back(EncodableValue());
+                                  wrapped.emplace_back();
                                   reply(EncodableValue(std::move(wrapped)));
                                 });
             } catch (const std::exception& exception) {
@@ -4695,10 +4747,12 @@ EncodableValue MultiFactorTotpSecretHostApi::WrapError(
                                       error.details()});
 }
 
-GenerateInterfacesCodecSerializer::GenerateInterfacesCodecSerializer() {}
+GenerateInterfacesCodecSerializer::GenerateInterfacesCodecSerializer() =
+    default;
 
 EncodableValue GenerateInterfacesCodecSerializer::ReadValueOfType(
-    uint8_t type, flutter::ByteStreamReader* stream) const {
+    uint8_t type,
+    flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 128:
       return CustomEncodableValue(PigeonMultiFactorInfo::FromEncodableList(
@@ -4709,7 +4763,8 @@ EncodableValue GenerateInterfacesCodecSerializer::ReadValueOfType(
 }
 
 void GenerateInterfacesCodecSerializer::WriteValue(
-    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+    const EncodableValue& value,
+    flutter::ByteStreamWriter* stream) const {
   if (const CustomEncodableValue* custom_value =
           std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(PigeonMultiFactorInfo)) {
@@ -4735,7 +4790,7 @@ const flutter::StandardMessageCodec& GenerateInterfaces::GetCodec() {
 void GenerateInterfaces::SetUp(flutter::BinaryMessenger* binary_messenger,
                                GenerateInterfaces* api) {
   {
-    auto channel = std::make_unique<BasicMessageChannel<>>(
+    const auto channel = std::make_unique<BasicMessageChannel<>>(
         binary_messenger,
         "dev.flutter.pigeon.firebase_auth_platform_interface."
         "GenerateInterfaces.pigeonInterface",
@@ -4754,14 +4809,14 @@ void GenerateInterfaces::SetUp(flutter::BinaryMessenger* binary_messenger,
               const auto& info_arg =
                   std::any_cast<const PigeonMultiFactorInfo&>(
                       std::get<CustomEncodableValue>(encodable_info_arg));
-              std::optional<FlutterError> output =
+              const std::optional<FlutterError> output =
                   api->PigeonInterface(info_arg);
               if (output.has_value()) {
                 reply(WrapError(output.value()));
                 return;
               }
               EncodableList wrapped;
-              wrapped.push_back(EncodableValue());
+              wrapped.emplace_back();
               reply(EncodableValue(std::move(wrapped)));
             } catch (const std::exception& exception) {
               reply(WrapError(exception.what()));

@@ -9,9 +9,9 @@
 
 namespace flutter {
 
-FlutterEngine::FlutterEngine() {}
+FlutterEngine::FlutterEngine() = default;
 
-FlutterEngine::~FlutterEngine() {}
+FlutterEngine::~FlutterEngine() = default;
 
 bool FlutterEngine::Start(const std::string& icu_data_path,
                           const std::string& assets_path,

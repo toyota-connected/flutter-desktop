@@ -6,12 +6,13 @@
 
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 namespace flutter {
 
 FlutterWindowController::FlutterWindowController(
-    const std::string& icu_data_path)
-    : icu_data_path_(icu_data_path) {
+    std::string  icu_data_path)
+    : icu_data_path_(std::move(icu_data_path)) {
   init_succeeded_ = FlutterDesktopInit();
 }
 
