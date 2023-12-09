@@ -38,7 +38,7 @@ static constexpr char kInternalConsistencyError[] =
 
 namespace flutter {
 void TextInputPlugin::CharHook(GLFWwindow* /* window */,
-                               unsigned int code_point) {
+                               const unsigned int code_point) {
   if (active_model_ == nullptr) {
     return;
   }
@@ -102,7 +102,7 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger)
   channel_->SetMethodCallHandler(
       [this](
           const flutter::MethodCall<rapidjson::Document>& call,
-          std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
+          const std::unique_ptr<flutter::MethodResult<rapidjson::Document>>& result) {
         HandleMethodCall(call, result);
       });
 }

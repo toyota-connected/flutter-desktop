@@ -33,7 +33,7 @@ PlatformHandler::PlatformHandler(flutter::BinaryMessenger* messenger,
   channel_->SetMethodCallHandler(
       [this](
           const flutter::MethodCall<rapidjson::Document>& call,
-          std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
+          const std::unique_ptr<flutter::MethodResult<rapidjson::Document>>& result) {
         HandleMethodCall(call, result);
       });
 }

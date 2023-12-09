@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 
 namespace flutter {
-DesktopEventLoop::DesktopEventLoop(std::thread::id main_thread_id,
+DesktopEventLoop::DesktopEventLoop(const std::thread::id main_thread_id,
                                    const TaskExpiredCallback& on_task_expired)
     : EventLoop(main_thread_id, on_task_expired) {}
 
@@ -17,20 +17,20 @@ void DesktopEventLoop::WaitUntil(const TaskTimePoint& time) {
   const auto now = TaskTimePoint::clock::now();
 
   // Make sure the seconds are not integral.
-  using Seconds = std::chrono::duration<double, std::ratio<1>>;
+  using Seconds = std::chrono::duration<double>;
   const auto duration_to_wait = std::chrono::duration_cast<Seconds>(time - now);
 
   if (duration_to_wait.count() > 0.0) {
-    ::glfwWaitEventsTimeout(duration_to_wait.count());
+    glfwWaitEventsTimeout(duration_to_wait.count());
   } else {
     // Avoid engine task priority inversion by making sure GLFW events are
     // always processed even when there is no need to wait for pending engine
     // tasks.
-    ::glfwPollEvents();
+    glfwPollEvents();
   }
 }
 
 void DesktopEventLoop::Wake() {
-  ::glfwPostEmptyEvent();
+  glfwPostEmptyEvent();
 }
 }  // namespace flutter

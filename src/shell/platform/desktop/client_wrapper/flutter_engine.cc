@@ -61,7 +61,7 @@ FlutterDesktopPluginRegistrarRef FlutterEngine::GetRegistrarForPlugin(
   return FlutterDesktopGetPluginRegistrar(engine_.get(), plugin_name.c_str());
 }
 
-void FlutterEngine::RunEventLoopWithTimeout(std::chrono::milliseconds timeout) {
+void FlutterEngine::RunEventLoopWithTimeout(const std::chrono::milliseconds timeout) {
   if (!engine_) {
     std::cerr << "Cannot run event loop without a running engine; call "
                  "Run first."

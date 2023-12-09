@@ -92,7 +92,7 @@ FlutterDesktopPluginRegistrarRef FlutterWindowController::GetRegistrarForPlugin(
 }
 
 bool FlutterWindowController::RunEventLoopWithTimeout(
-    std::chrono::milliseconds timeout) {
+    const std::chrono::milliseconds timeout) {
   if (!controller_) {
     std::cerr << "Cannot run event loop without a window window; call "
                  "CreateWindow first."
@@ -108,7 +108,7 @@ bool FlutterWindowController::RunEventLoopWithTimeout(
   } else {
     timeout_milliseconds = static_cast<uint32_t>(timeout.count());
   }
-  bool still_running = FlutterDesktopRunWindowEventLoopWithTimeout(
+  const bool still_running = FlutterDesktopRunWindowEventLoopWithTimeout(
       controller_, timeout_milliseconds);
   if (!still_running) {
     DestroyWindow();

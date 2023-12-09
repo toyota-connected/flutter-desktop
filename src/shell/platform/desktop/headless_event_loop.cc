@@ -13,7 +13,7 @@ HeadlessEventLoop::~HeadlessEventLoop() = default;
 
 void HeadlessEventLoop::WaitUntil(const TaskTimePoint& time) {
   std::mutex& mutex = GetTaskQueueMutex();
-  std::unique_lock<std::mutex> lock(mutex);
+  std::unique_lock lock(mutex);
   task_queue_condition_.wait_until(lock, time);
 }
 

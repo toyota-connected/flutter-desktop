@@ -99,7 +99,7 @@ struct FlutterDesktopWindow {
 
 // Custom deleter for FlutterEngineAOTData.
 struct AOTDataDeleter {
-  void operator()(FlutterEngineAOTData aot_data) const {
+  void operator()(const FlutterEngineAOTData aot_data) const {
     LibFlutterEngine->CollectAOTData(aot_data);
   }
 };
@@ -284,8 +284,8 @@ static void SendWindowMetrics(
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
-  event.width = (size_t)width;
-  event.height = (size_t)height;
+  event.width = static_cast<size_t>(width);
+  event.height = static_cast<size_t>(height);
   if (controller->window_wrapper->pixel_ratio_override == 0.0) {
     // The Flutter pixel_ratio is defined as DPI/dp. Limit the ratio to a
     // minimum of 1 to avoid rendering a smaller UI on standard resolution
@@ -418,7 +418,7 @@ static void SetEventLocationFromCursorPosition(
 // engine.
 static void SetEventPhaseFromCursorButtonState(GLFWwindow* window,
                                                FlutterPointerEvent* event_data,
-                                               int64_t buttons) {
+                                               const int64_t buttons) {
   auto const* controller = GetWindowController(window);
   event_data->phase =
       (buttons == 0)
@@ -429,7 +429,7 @@ static void SetEventPhaseFromCursorButtonState(GLFWwindow* window,
 }
 
 // Reports the mouse entering or leaving the Flutter view.
-static void GLFWCursorEnterCallback(GLFWwindow* window, int entered) {
+static void GLFWCursorEnterCallback(GLFWwindow* window, const int entered) {
   FlutterPointerEvent event = {};
   event.phase =
       entered ? FlutterPointerPhase::kAdd : FlutterPointerPhase::kRemove;
@@ -438,7 +438,7 @@ static void GLFWCursorEnterCallback(GLFWwindow* window, int entered) {
 }
 
 // Reports mouse movement to the Flutter engine.
-static void GLFWCursorPositionCallback(GLFWwindow* window, double x, double y) {
+static void GLFWCursorPositionCallback(GLFWwindow* window, const double x, const double y) {
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
@@ -449,8 +449,8 @@ static void GLFWCursorPositionCallback(GLFWwindow* window, double x, double y) {
 
 // Reports mouse button press to the Flutter engine.
 static void GLFWMouseButtonCallback(GLFWwindow* window,
-                                    int key,
-                                    int action,
+                                    const int key,
+                                    const int action,
                                     int /* mods */) {
   int64_t button;
   if (key == GLFW_MOUSE_BUTTON_LEFT) {
@@ -490,8 +490,8 @@ static void GLFWMouseButtonCallback(GLFWwindow* window,
 
 // Reports scroll wheel events to the Flutter engine.
 static void GLFWScrollCallback(GLFWwindow* window,
-                               double delta_x,
-                               double delta_y) {
+                               const double delta_x,
+                               const double delta_y) {
   FlutterPointerEvent event = {};
   SetEventLocationFromCursorPosition(window, &event);
   auto const* controller = GetWindowController(window);
@@ -506,7 +506,7 @@ static void GLFWScrollCallback(GLFWwindow* window,
 }
 
 // Passes character input events to registered handlers.
-static void GLFWCharCallback(GLFWwindow* window, unsigned int code_point) {
+static void GLFWCharCallback(GLFWwindow* window, const unsigned int code_point) {
   for (const auto& handler :
        GetWindowController(window)->keyboard_hook_handlers) {
     handler->CharHook(window, code_point);
@@ -515,10 +515,10 @@ static void GLFWCharCallback(GLFWwindow* window, unsigned int code_point) {
 
 // Passes raw key events to registered handlers.
 static void GLFWKeyCallback(GLFWwindow* window,
-                            int key,
-                            int scancode,
-                            int action,
-                            int mods) {
+                            const int key,
+                            const int scancode,
+                            const int action,
+                            const int mods) {
   for (const auto& handler :
        GetWindowController(window)->keyboard_hook_handlers) {
     handler->KeyboardHook(window, key, scancode, action, mods);
@@ -526,7 +526,7 @@ static void GLFWKeyCallback(GLFWwindow* window,
 }
 
 // Enables/disables the callbacks related to mouse tracking.
-static void SetHoverCallbacksEnabled(GLFWwindow* window, bool enabled) {
+static void SetHoverCallbacksEnabled(GLFWwindow* window, const bool enabled) {
   glfwSetCursorEnterCallback(window,
                              enabled ? GLFWCursorEnterCallback : nullptr);
   glfwSetCursorPosCallback(window,
@@ -663,7 +663,7 @@ static void GLFWClearCanvas(GLFWwindow* window) {
   glfwMakeContextCurrent(nullptr);
 }
 
-static void GLFWErrorCallback(int error_code, const char* description) {
+static void GLFWErrorCallback(const int error_code, const char* description) {
   std::cerr << "GLFW error " << error_code << ": " << description << std::endl;
 }
 
@@ -708,7 +708,7 @@ static bool RunFlutterEngine(
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
-  std::vector<const char*> argv = {"placeholder"};
+  std::vector argv = {"placeholder"};
   if (engine_properties.switches_count > 0) {
     argv.insert(argv.end(), &engine_properties.switches[0],
                 &engine_properties.switches[engine_properties.switches_count]);
@@ -954,8 +954,8 @@ void FlutterDesktopWindowSetTitle(FlutterDesktopWindowRef flutter_window,
 
 void FlutterDesktopWindowSetIcon(FlutterDesktopWindowRef flutter_window,
                                  uint8_t* pixel_data,
-                                 int width,
-                                 int height) {
+                                 const int width,
+                                 const int height) {
   const GLFWimage image = {width, height,
                            static_cast<unsigned char*>(pixel_data)};
   glfwSetWindowIcon(flutter_window->window, pixel_data ? 1 : 0, &image);
@@ -1180,7 +1180,7 @@ void FlutterDesktopMessengerSendResponse(
 
 void FlutterDesktopMessengerSetCallback(FlutterDesktopMessengerRef messenger,
                                         const char* channel,
-                                        FlutterDesktopMessageCallback callback,
+                                        const FlutterDesktopMessageCallback callback,
                                         void* user_data) {
   messenger->GetEngine()->message_dispatcher->SetMessageCallback(
       channel, callback, user_data);

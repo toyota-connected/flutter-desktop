@@ -19,13 +19,13 @@ bool EventLoop::RunsTasksOnCurrentThread() const {
   return std::this_thread::get_id() == main_thread_id_;
 }
 
-void EventLoop::WaitForEvents(std::chrono::nanoseconds max_wait) {
+void EventLoop::WaitForEvents(const std::chrono::nanoseconds max_wait) {
   const auto now = TaskTimePoint::clock::now();
   std::vector<FlutterTask> expired_tasks;
 
   // Process expired tasks.
   {
-    std::lock_guard<std::mutex> lock(task_queue_mutex_);
+    std::lock_guard lock(task_queue_mutex_);
     while (!task_queue_.empty()) {
       const auto& top = task_queue_.top();
       // If this task (and all tasks after this) has not yet expired, there is
@@ -58,7 +58,7 @@ void EventLoop::WaitForEvents(std::chrono::nanoseconds max_wait) {
   {
     TaskTimePoint next_wake;
     {
-      std::lock_guard<std::mutex> lock(task_queue_mutex_);
+      std::lock_guard lock(task_queue_mutex_);
       const TaskTimePoint max_wake_timepoint =
           max_wait == std::chrono::nanoseconds::max() ? TaskTimePoint::max()
                                                       : now + max_wait;
@@ -89,7 +89,7 @@ void EventLoop::PostTask(const FlutterTask flutter_task,
   task.task = flutter_task;
 
   {
-    std::lock_guard<std::mutex> lock(task_queue_mutex_);
+    std::lock_guard lock(task_queue_mutex_);
     task_queue_.push(task);
 
     // Make sure the queue mutex is unlocked before waking up the loop. In case
